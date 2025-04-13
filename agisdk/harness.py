@@ -233,9 +233,11 @@ class EvalHarness:
                 return
             
             # Run the agent function
+            # disconnect the websocket
+            ws.close()
             try:
                 # Run the agent function with CDP port instead of Playwright page
-                agent_response = self.agent_fn(task_obj['goal'], cdp_port)
+                agent_response = self.agent_fn(task_obj['goal'], ws_url)
                 task_result["agent_response"] = agent_response
             except Exception as e:
                 print(f"Error running agent function: {e}")
@@ -246,6 +248,9 @@ class EvalHarness:
                 ws.close()
                 kill_cdp()
                 return
+            
+            # Reconnect to the WebSocket
+            ws = websocket.create_connection(ws_url)
             
             # extract state and evals
             try:
