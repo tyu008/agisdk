@@ -1,6 +1,23 @@
 from agisdk import EvalHarness
 
-def my_agent(prompt, playwright_object):
+def my_cdp_agent(prompt, cdp_url):
+    """
+    Example agent implementation.
+    
+    Args:
+        prompt: Task description
+        playwright_object: Playwright browser instance or URL, depending on harness type
+        
+    Returns:
+        String containing the agent's response
+    """
+    print(f"Agent received prompt: {prompt}")
+    print(f"Connecting to CDP URL: {cdp_url}")
+    input("Press Enter to continue...")
+    # In a real implementation, this would use the playwright_object to interact with a browser
+    return "Task completed successfully"
+
+def my_playwright_agent(prompt, playwright_object):
     """
     Example agent implementation.
     
@@ -16,10 +33,11 @@ def my_agent(prompt, playwright_object):
     # In a real implementation, this would use the playwright_object to interact with a browser
     return "Task completed successfully"
 
+
 # Initialize the evaluation harness
 harness = EvalHarness(
-    agent_fn=my_agent,
-    type="cdp",
+    agent_fn=my_playwright_agent,
+    type="playwright",
     max_steps=25
 )
 
