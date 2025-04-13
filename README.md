@@ -57,7 +57,7 @@ def my_playwright_agent(prompt, browser):
 # Initialize with Playwright
 harness = EvalHarness(my_playwright_agent, type="playwright", max_steps=25)
 
-results = harness.run(
+harness.run(
     local=True,
     use_cache=True,
     dir="./results",
@@ -108,7 +108,7 @@ def my_cdp_agent(prompt, cdp_url):
 # Initialize with CDP
 harness = EvalHarness(my_cdp_agent, type="cdp", max_steps=25)
 
-results = harness.run(
+harness.run(
     local=True,
     use_cache=True,
     dir="./results",

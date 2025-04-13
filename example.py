@@ -49,7 +49,7 @@ harness = EvalHarness(
 )
 
 # Run the evaluation
-results = harness.run(
+harness.run(
     local=True,
     use_cache=True,
     dir="./results",
@@ -59,7 +59,7 @@ results = harness.run(
 )
 
 # Show the results
-# results.show()
+# harness.show_results()
 
 # You can also save the results to a file
 # results.save("./results/summary.json")

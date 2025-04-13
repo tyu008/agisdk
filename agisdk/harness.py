@@ -4,6 +4,7 @@ import importlib.resources
 import json
 from .eval import check_evals
 from .cdp_utils import launch_chromium
+from .results_utils import show_results
 
 
 # Import optional Playwright utilities
@@ -238,9 +239,10 @@ class EvalHarness:
             # Run the agent function
             # disconnect the websocket
             ws.close()
+            cdp_url = f"http://localhost:{cdp_port}"
             try:
                 # Run the agent function with CDP port instead of Playwright page
-                agent_response = self.agent_fn(task_obj['goal'], ws_url)
+                agent_response = self.agent_fn(task_obj['goal'], cdp_url)
                 task_result["agent_response"] = agent_response
             except Exception as e:
                 print(f"Error running agent function: {e}")
@@ -251,6 +253,7 @@ class EvalHarness:
                 ws.close()
                 kill_cdp()
                 return
+            print("Agent finished running, back to harness ")
             
             # Reconnect to the WebSocket
             ws = websocket.create_connection(ws_url)
@@ -349,4 +352,18 @@ class EvalHarness:
         else:
             raise ValueError(f"Unsupported harness type: {self.type}")
         # Save results
+        
+    def show_results(self, dir: str = None):
+        """
+        Compute and display statistics from task results in the specified directory.
+        
+        Args:
+            dir: Directory containing the results (default: self.results_dir or "./results")
+        
+        Returns:
+            Dict with statistics about task results
+        """
+        # Use the directory from run() if available, otherwise use parameter or default
+        results_dir = dir or getattr(self, 'results_dir', "./results")
+        return show_results(results_dir)
         
