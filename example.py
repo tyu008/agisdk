@@ -17,20 +17,27 @@ def my_cdp_agent(prompt, cdp_url):
     # In a real implementation, this would use the playwright_object to interact with a browser
     return "Task completed successfully"
 
-def my_playwright_agent(prompt, playwright_object):
+def my_playwright_agent(prompt, browser):
     """
-    Example agent implementation.
+    Example agent implementation with Playwright.
     
     Args:
         prompt: Task description
-        playwright_object: Playwright browser instance or URL, depending on harness type
+        browser: Playwright browser instance
         
     Returns:
         String containing the agent's response
     """
     print(f"Agent received prompt: {prompt}")
+    print(f"Browser has {len(browser.contexts)} contexts")
+    
+    # Access the context and pages
+    if browser.contexts:
+        context = browser.contexts[0]
+        print(f"Context has {len(context.pages)} pages")
+    
     input("Press Enter to continue...")
-    # In a real implementation, this would use the playwright_object to interact with a browser
+    # In a real implementation, this would use the browser to interact with web pages
     return "Task completed successfully"
 
 

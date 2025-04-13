@@ -29,19 +29,27 @@ pip install agisdk
 ```python
 from agisdk import EvalHarness
 
-def my_playwright_agent(prompt, page):
+def my_playwright_agent(prompt, browser):
     """
     Args:
         prompt: Task description
-        page: Playwright page object
+        browser: Playwright browser object
         
     Returns:
         String containing the agent's response
     """
+    # Get access to the browser's contexts and pages
+    context = browser.contexts[0]  # Get the first browser context
+    page = context.pages[0]  # Get the first page in the context
+    
     # Implement browser automation with the Playwright API
     page.goto("https://example.com")
     page.fill("input#search", "my query")
     page.click("button[type=submit]")
+    
+    # You can create additional pages if needed
+    new_page = context.new_page()
+    new_page.goto("https://another-example.com")
     
     return "Task completed successfully"
 

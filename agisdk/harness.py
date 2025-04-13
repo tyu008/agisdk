@@ -115,8 +115,8 @@ class EvalHarness:
                 return
             
             try:
-                # Run the agent function
-                agent_response = self.agent_fn(task_obj['goal'], main_page)
+                # Run the agent function and pass the browser instance instead of just the page
+                agent_response = self.agent_fn(task_obj['goal'], browser)
                 task_result["agent_response"] = agent_response
             except Exception as e:
                 print(f"Error running agent function: {e}")
