@@ -19,7 +19,7 @@ def my_agent(prompt, playwright_object):
 # Initialize the evaluation harness
 harness = EvalHarness(
     agent_fn=my_agent,
-    type="playwright",
+    type="cdp",
     max_steps=25
 )
 
