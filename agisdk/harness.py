@@ -5,6 +5,7 @@ import json
 from .eval import check_evals
 from .cdp_utils import launch_chromium
 
+
 # Import optional Playwright utilities
 try:
     from .playwright_utils import (
@@ -163,7 +164,7 @@ class EvalHarness:
             import requests
             import websocket
             import time
-            
+            # setup the connection and navigate to the task URL + config
             try:
                 # Wait for Chrome to start up
                 time.sleep(2)
@@ -191,20 +192,10 @@ class EvalHarness:
                 # Connect to the target using WebSocket
                 ws = websocket.create_connection(ws_url)
                 
-                # Enable necessary domains
-                domains = ["Page", "Runtime", "DOM", "Network"]
-                for i, domain in enumerate(domains):
-                    enable_cmd = {
-                        "id": i + 1,
-                        "method": f"{domain}.enable"
-                    }
-                    ws.send(json.dumps(enable_cmd))
-                    ws.recv()  # Get the response
-                
                 # Configure the task
                 config_url = f"{base_url}/config?run_id=local&task_id={task_id}"
                 navigate_config_cmd = {
-                    "id": len(domains) + 1,
+                    "id": 1,
                     "method": "Page.navigate",
                     "params": {
                         "url": config_url
@@ -218,7 +209,7 @@ class EvalHarness:
                 
                 # Navigate to the main task URL
                 navigate_cmd = {
-                    "id": len(domains) + 2,
+                    "id": 2,
                     "method": "Page.navigate",
                     "params": {
                         "url": base_url
@@ -229,147 +220,125 @@ class EvalHarness:
                 
                 # Wait for page to load
                 time.sleep(2)
-                
-                try:
-                    # Run the agent function with CDP port instead of Playwright page
-                    agent_response = self.agent_fn(task_obj['goal'], cdp_port)
-                    task_result["agent_response"] = agent_response
-                except Exception as e:
-                    print(f"Error running agent function: {e}")
-                    task_result["agent_error"] = str(e)
-                    task_result["error"] = True
-                    with open(results_file, 'w') as f:
-                        json.dump(task_result, f, indent=2)
-                    ws.close()
-                    kill_cdp()
-                    return
-                
-                try:
-                    # Navigate to the finish endpoint
-                    finish_url = f"{base_url}/finish"
-                    finish_cmd = {
-                        "id": len(domains) + 3,
-                        "method": "Page.navigate",
-                        "params": {
-                            "url": finish_url
-                        }
-                    }
-                    ws.send(json.dumps(finish_cmd))
-                    ws.recv()  # Get navigation response
-                    
-                    # Wait for page to load
-                    time.sleep(8)
-                    
-                    # Get the document HTML to extract the JSON
-                    get_doc_cmd = {
-                        "id": len(domains) + 4,
-                        "method": "DOM.getDocument"
-                    }
-                    ws.send(json.dumps(get_doc_cmd))
-                    doc_response = json.loads(ws.recv())
-                    print(f"Document response: {doc_response}")
-                    
-                    # Find the pre element containing JSON data
-                    find_pre_cmd = {
-                        "id": len(domains) + 5,
-                        "method": "DOM.querySelector",
-                        "params": {
-                            "nodeId": doc_response["result"]["root"]["nodeId"],
-                            "selector": "pre"
-                        }
-                    }
-                    ws.send(json.dumps(find_pre_cmd))
-                    pre_response = json.loads(ws.recv())
-                    
-                    # Get the text content of the pre element
-                    get_text_cmd = {
-                        "id": len(domains) + 6,
-                        "method": "DOM.getOuterHTML",
-                        "params": {
-                            "nodeId": pre_response["result"]["nodeId"]
-                        }
-                    }
-                    ws.send(json.dumps(get_text_cmd))
-                    text_response = json.loads(ws.recv())
-                    
-                    # Extract the JSON data
-                    html_content = text_response["result"]["outerHTML"]
-                    # Parse the content to extract the JSON
-                    import re
-                    json_match = re.search(r'<pre>(.*?)</pre>', html_content, re.DOTALL)
-                    if json_match:
-                        env_state = json_match.group(1)
-                        finish_state = json.loads(env_state)
-                    else:
-                        raise Exception("Could not extract JSON data from finish page")
-                        
-                except Exception as e:
-                    import traceback
-                    import sys
-                    exc_type, exc_value, exc_traceback = sys.exc_info()
-                    trace_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
-                    error_trace = "".join(trace_details)
-                    
-                    print(f"Error getting finish state: {e}")
-                    print(f"Error type: {exc_type.__name__}")
-                    print(f"Full traceback:\n{error_trace}")
-                    
-                    task_result["finish_state_error"] = str(e)
-                    task_result["error_traceback"] = error_trace
-                    task_result["error"] = True
-                    with open(results_file, 'w') as f:
-                        json.dump(task_result, f, indent=2)
-                    ws.close()
-                    kill_cdp()
-                    return
-                
-                task_result["finish_state"] = finish_state
-                eval_results = check_evals(
-                    task_obj['evals'],
-                    finish_state,
-                    model_response=agent_response,
-                )
-                task_result["eval_results"] = eval_results
-                if eval_results[0]:
-                    task_result["success"] = True
-                    task_result["score"] = 1.0
-                else:
-                    task_result["success"] = False
-                    task_result["score"] = 0.0
-                
-                task_result["completed"] = True
-                task_result["error"] = False
-                task_result["env_setup_error"] = None
-                task_result["agent_error"] = None
-                task_result["finish_state_error"] = None
-                
-                # Close the WebSocket connection
-                ws.close()
-                
             except Exception as e:
-                print(f"Error in CDP harness: {e}")
-                task_result["error"] = str(e)
+                print(f"Error setting up CDP: {e}")
+                task_result["env_setup_error"] = str(e)
+                task_result["error"] = True
+                with open(results_file, 'w') as f:
+                    json.dump(task_result, f, indent=2)
+                ws.close()
+                kill_cdp()
                 with open(results_file, 'w') as f:
                     json.dump(task_result, f, indent=2)
                 return
-            finally:
-                # Kill the browser
-                kill_cdp()
             
+            # Run the agent function
+            try:
+                # Run the agent function with CDP port instead of Playwright page
+                agent_response = self.agent_fn(task_obj['goal'], cdp_port)
+                task_result["agent_response"] = agent_response
+            except Exception as e:
+                print(f"Error running agent function: {e}")
+                task_result["agent_error"] = str(e)
+                task_result["error"] = True
+                with open(results_file, 'w') as f:
+                    json.dump(task_result, f, indent=2)
+                ws.close()
+                kill_cdp()
+                return
+            
+            # extract state and evals
+            try:
+                # Navigate to the finish endpoint
+                finish_url = f"{base_url}/finish"
+                finish_cmd = {
+                    "id": 3,
+                    "method": "Page.navigate",
+                    "params": {
+                        "url": finish_url
+                    }
+                }
+                
+                ws.send(json.dumps(finish_cmd))
+                ws.recv()  # Get navigation response
+                
+                # Wait for page to load
+                time.sleep(5)
+                
+                # Extract JSON from the page using CDP
+                cmd = {
+                    "id": 4,  # unique ID for this command
+                    "method": "Runtime.evaluate",
+                    "params": {
+                        "expression": "document.documentElement.outerHTML",
+                        "returnByValue": True  # ensures the HTML is returned directly as a JSON value
+                    }
+                }
+                
+                # Send the command
+                ws.send(json.dumps(cmd))
+                
+                # Receive and parse the response
+                response = ws.recv()
+                result = json.loads(response)
+                page_text = result.get("result", {}).get("result", {}).get("value", "")
+                # get the text in the <pre></pre> tag
+                import re
+                match = re.search(r'<pre.*?>(.*?)</pre>', page_text, re.DOTALL)
+                if match:
+                    json_text = match.group(1)
+                    finish_state = json.loads(json_text)
+                else:
+                    raise Exception("No JSON found in the <pre> tag")
+            except Exception as e:
+                import traceback
+                import sys
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                trace_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
+                error_trace = "".join(trace_details)
+                
+                print(f"Error getting finish state: {e}")
+                print(f"Error type: {exc_type.__name__}")
+                print(f"Full traceback:\n{error_trace}")
+                
+                task_result["finish_state_error"] = str(e)
+                task_result["error_traceback"] = error_trace
+                task_result["error"] = True
+                with open(results_file, 'w') as f:
+                    json.dump(task_result, f, indent=2)
+                ws.close()
+                kill_cdp()
+                with open(results_file, 'w') as f:
+                    json.dump(task_result, f, indent=2)
+                return
+                
+            task_result["finish_state"] = finish_state
+            eval_results = check_evals(
+                task_obj['evals'],
+                finish_state,
+                model_response=agent_response,
+            )
+            task_result["eval_results"] = eval_results
+            if eval_results[0]:
+                task_result["success"] = True
+                task_result["score"] = 1.0
+            else:
+                task_result["success"] = False
+                task_result["score"] = 0.0
+            
+            task_result["completed"] = True
+            task_result["error"] = False
+            task_result["env_setup_error"] = None
+            task_result["agent_error"] = None
+            task_result["finish_state_error"] = None
+            
+            ws.close()
+            kill_cdp()
+            with open(results_file, 'w') as f:
+                json.dump(task_result, f, indent=2)
+            return
+        
         else:
             raise ValueError(f"Unsupported harness type: {self.type}")
-        # For other harness types (URL, CDP)
-        # For now, create a dummy result
-        task_result = {
-            "completed": False,
-            "success": False,
-            "error": True,
-            "score": 1.0,
-            "task_id": task_id
-        }
-        
         # Save results
-        with open(results_file, 'w') as f:
-            json.dump(task_result, f, indent=2)
         
-        return [True, task_result]
