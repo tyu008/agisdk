@@ -3,6 +3,7 @@ import os
 import importlib.resources
 import json
 from .eval import check_evals
+from cdp_utils import launch_chromium
 
 # Import optional Playwright utilities
 try:
@@ -155,6 +156,14 @@ class EvalHarness:
             task_result["finish_state_error"] = None
             cleanup_playwright(browser, context, main_page, background_page)
         
+        elif self.type == "cdp":
+            # Start CDP with cdp_utils
+            cdp_port, kill_cdp = launch_chromium(headless=False)
+            # connect to the target with websocket
+            
+            # go to urls
+            # start the task (pass in cdp port too)
+            pass
             
         else:
             raise ValueError(f"Unsupported harness type: {self.type}")
