@@ -13,7 +13,7 @@ pip install agisdk
 - Multiple browser automation options:
   - **Playwright**: High-level browser automation with the Playwright API
   - **CDP (Chrome DevTools Protocol)**: Low-level browser automation using WebSockets
-- Task-based evaluation system 
+- Task-based evaluation system
 - Caching to avoid redundant runs
 - Parallel execution of tasks
 
@@ -34,23 +34,24 @@ def my_playwright_agent(prompt, browser):
     Args:
         prompt: Task description
         browser: Playwright browser object
-        
+
     Returns:
         String containing the agent's response
     """
     # Get access to the browser's contexts and pages
     context = browser.contexts[0]  # Get the first browser context
     page = context.pages[0]  # Get the first page in the context
-    
+
     # Implement browser automation with the Playwright API
     page.goto("https://example.com")
     page.fill("input#search", "my query")
     page.click("button[type=submit]")
-    
+
     # You can create additional pages if needed
     new_page = context.new_page()
     new_page.goto("https://another-example.com")
-    
+    input("press space to continue")
+
     return "Task completed successfully"
 
 # Initialize with Playwright
@@ -76,16 +77,16 @@ def my_cdp_agent(prompt, cdp_url):
     Args:
         prompt: Task description
         cdp_url: WebSocket URL for CDP connection
-        
+
     Returns:
         String containing the agent's response
     """
     import json
     import websocket
-    
+
     # Connect to Chrome via CDP WebSocket
     ws = websocket.create_connection(cdp_url)
-    
+
     # Navigate to a URL
     navigate_cmd = {
         "id": 1,
@@ -96,9 +97,11 @@ def my_cdp_agent(prompt, cdp_url):
     }
     ws.send(json.dumps(navigate_cmd))
     response = ws.recv()
-    
+
     # Additional browser interactions using CDP commands
-    
+    input("press space to continue")
+
+
     ws.close()
     return "Task completed successfully"
 

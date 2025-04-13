@@ -155,6 +155,9 @@ class EvalHarness:
             task_result["env_setup_error"] = None
             task_result["agent_error"] = None
             task_result["finish_state_error"] = None
+            # save results
+            with open(results_file, 'w') as f:
+                json.dump(task_result, f, indent=2)
             cleanup_playwright(browser, context, main_page, background_page)
         
         elif self.type == "cdp":
