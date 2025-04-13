@@ -1,6 +1,20 @@
 from typing import Callable, Literal, Optional, Union, List, Dict, Any
-from .results import Results
 import os
+import importlib.resources
+import json
+from eval import check_evals
+
+# Import optional Playwright utilities
+try:
+    from .playwright_utils import (
+        setup_playwright, cleanup_playwright, get_finish_json, PLAYWRIGHT_AVAILABLE
+    )
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
+
+# Import evaluation function
+from .eval import check_evals
+
 
 class EvalHarness:
     def __init__(self, 
@@ -25,43 +39,119 @@ class EvalHarness:
             dir: str = "./results",
             tasks: Union[Literal["all"], List[str]] = "all",
             paralel: bool = True,
-            num_workers: int = 4) -> Results:
-        """
-        Run the evaluation harness on the specified tasks.
-        
-        Args:
-            local: Whether to run locally
-            use_cache: Whether to use cached results
-            dir: Directory to store results
-            tasks: Tasks to run ("all" or a list of task names)
-            paralel: Whether to run tasks in parallel
-            num_workers: Number of parallel workers
-            
-        Returns:
-            Results object containing evaluation results
-        """
-        print(f"Running evaluation with {self.type} harness")
-        print(f"Max steps: {self.max_steps}")
-        print(f"Local: {local}, Use cache: {use_cache}")
-        print(f"Results directory: {dir}")
-        print(f"Tasks: {tasks}")
-        print(f"Parallel: {paralel}, Workers: {num_workers}")
-        
-        # Create results directory if it doesn't exist
+            num_workers: int = 4):
+        """Run evaluation harness on tasks."""
+        self.results_dir = dir
+        self.use_cache = use_cache
         os.makedirs(dir, exist_ok=True)
         
-        # Placeholder for actual implementation
-        # Here you would:
-        # 1. Load tasks
-        # 2. Set up the environment based on harness type
-        # 3. Run the agent on each task
-        # 4. Collect and analyze results
+        # Load all tasks
+        all_tasks = []
+        tasks_dir = importlib.resources.files("agisdk.tasks")
+        for task_json in tasks_dir.iterdir():
+            if task_json.name.endswith('.json'):
+                obj = json.loads(task_json.read_text())
+                all_tasks.append(obj)            
         
-        results_data = {
-            "tasks_completed": 0,
-            "tasks_failed": 0,
-            "average_score": 0.0,
-            "details": {}
-        }
+        # Run tasks
+        for task in all_tasks:
+            self.run_task(task)
+        print("done")
+                        
+    def run_task(self, task_obj):
+        """Run a single task and return success status and details."""
+        task_id = task_obj['id']
+        print(f"Running task {task_id}")
         
-        return Results(results_data)
+        # Create task directory
+        task_dir = os.path.join(self.results_dir, task_id)
+        os.makedirs(task_dir, exist_ok=True)
+        
+        # Path to results file
+        results_file = os.path.join(task_dir, "results.json")
+        
+        # Check if we can use cached results
+        if self.use_cache and os.path.exists(results_file):
+            try:
+                with open(results_file, 'r') as f:
+                    results = json.load(f)
+                
+                # Check if task completed successfully with no errors
+                if results.get('completed', False) and not results.get('error'):
+                    print(f"Using cached results for task {task_id}")
+                    return [results.get('success', False), results]
+            except (json.JSONDecodeError, IOError) as e:
+                print(f"Error reading cache for {task_id}: {e}")
+                # Continue with execution if cache read fails
+        
+        if self.type == "playwright":
+            if not PLAYWRIGHT_AVAILABLE:
+                raise ImportError("Playwright is not available. Please install it.")
+            
+            task_result = {
+                "completed": False,
+                "success": False,
+                "error": None,
+                "score": 0.0,
+                "task_id": task_id
+            }
+            
+            # Get task website details
+            base_url = task_obj['website']['url']
+            
+            try:
+                # Setup Playwright
+                browser, context, main_page, background_page = setup_playwright(
+                    task_id=task_id,
+                    base_url=base_url,
+                    run_id="local",
+                    headless=False,
+                )
+            except Exception as e:
+                print(f"Error setting up Playwright: {e}")
+                task_result["env_setup_error"] = str(e)
+                task_result["error"] = True
+                with open(results_file, 'w') as f:
+                    json.dump(task_result, f, indent=2)
+                return
+            
+            try:
+                # Run the agent function
+                agent_response = self.agent_fn(task_obj['goal'], main_page)
+                task_result["agent_response"] = agent_response
+            except Exception as e:
+                print(f"Error running agent function: {e}")
+                task_result["agent_error"] = str(e)
+                task_result["error"] = True
+                with open(results_file, 'w') as f:
+                    json.dump(task_result, f, indent=2)
+                cleanup_playwright(browser, context, main_page, background_page)
+                return
+            
+            finish_state, error = get_finish_json(base_url, main_page)
+            task_result["finish_state"] = finish_state
+            eval_results = check_evals(
+                task_obj['evals'],
+                finish_state,
+                model_response=agent_response,
+            )
+            task_result["eval_results"] = eval_results
+            
+            cleanup_playwright(browser, context, main_page, background_page)
+            
+        else:
+            # For other harness types (URL, CDP)
+            # For now, create a dummy result
+            task_result = {
+                "completed": True,
+                "success": True,
+                "error": None,
+                "score": 1.0,
+                "task_id": task_id
+            }
+        
+        # Save results
+        with open(results_file, 'w') as f:
+            json.dump(task_result, f, indent=2)
+        
+        return [True, task_result]

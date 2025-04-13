@@ -12,6 +12,7 @@ def my_agent(prompt, playwright_object):
         String containing the agent's response
     """
     print(f"Agent received prompt: {prompt}")
+    input("Press Enter to continue...")
     # In a real implementation, this would use the playwright_object to interact with a browser
     return "Task completed successfully"
 
@@ -33,7 +34,7 @@ results = harness.run(
 )
 
 # Show the results
-results.show()
+# results.show()
 
 # You can also save the results to a file
 # results.save("./results/summary.json")
