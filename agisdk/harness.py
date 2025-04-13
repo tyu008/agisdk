@@ -2,7 +2,7 @@ from typing import Callable, Literal, Optional, Union, List, Dict, Any
 import os
 import importlib.resources
 import json
-from eval import check_evals
+from .eval import check_evals
 
 # Import optional Playwright utilities
 try:
@@ -11,9 +11,6 @@ try:
     )
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
-
-# Import evaluation function
-from .eval import check_evals
 
 
 class EvalHarness:
