@@ -31,7 +31,7 @@ def check_evals(evals, env_state, model_response=None, llm_evaluator=openai_eval
             try:
                 actual = jmespath.search(eval["query"], env_state)
                 passed = actual == eval["expected_value"]
-                results.append({"passed": passed, "actual": actual, "expected": eval["expected_value"]})
+                results.append({"eval":eval,"passed": passed, "actual": actual, "expected": eval["expected_value"]})
             except Exception as e:
                 results.append({"passed": False, "error": str(e)})
         elif eval["type"] == "llm_boolean" and llm_evaluator:

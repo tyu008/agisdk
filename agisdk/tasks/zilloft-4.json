@@ -11,7 +11,6 @@
   "difficulty": "medium",
   "challengeType": "retrieval",
   "possible": true,
-  "description": "eval not implemented yet",
   "evals": [
     {
       "type": "llm_boolean",
@@ -21,4 +20,4 @@
   ],
   "points": 1,
   "config": {}
-} 
+}

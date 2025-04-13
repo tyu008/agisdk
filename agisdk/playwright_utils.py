@@ -137,35 +137,16 @@ def cleanup_global_playwright():
 def get_finish_json(url, page, timeout=1000):
     """
     Extract JSON data from the finish endpoint.
-    This mimics AbstractWebCloneTask.get_finish_json()
-    
-    Args:
-        url: The base URL of the task
-        page: The Playwright page object
-        timeout: Maximum time to wait for navigation and selectors
-        
-    Returns:
-        Tuple of (environment_state_json, error_message)
     """
-    try:
-        # Navigate to the finish endpoint
-        page.goto(f"{url}/finish", timeout=timeout)
-        page.wait_for_load_state("networkidle", timeout=timeout)
-        
-        # Find the pre element containing JSON data
-        pre_element = page.wait_for_selector("pre")
-        if pre_element:
-            # Extract the text content
-            env_state = pre_element.inner_text()
-            try:
-                # Parse the JSON
-                import json
-                env_state_json = json.loads(env_state)
-                return env_state_json, None
-            except json.JSONDecodeError as e:
-                error_message = f"Invalid JSON format: {str(e)}"
-                return None, error_message
-        else:
-            return None, "No state data available"
-    except Exception as e:
-        return None, f"Error retrieving data: {str(e)}"
+    # Navigate to the finish endpoint
+    page.goto(f"{url}/finish", timeout=timeout)
+    page.wait_for_load_state("networkidle", timeout=timeout)
+    
+    # Find the pre element containing JSON data
+    pre_element = page.wait_for_selector("pre")
+    if pre_element:
+        # Extract the text content
+        env_state = pre_element.inner_text()
+        import json
+        env_state_json = json.loads(env_state)
+        return env_state_json

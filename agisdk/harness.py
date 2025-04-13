@@ -124,8 +124,16 @@ class EvalHarness:
                     json.dump(task_result, f, indent=2)
                 cleanup_playwright(browser, context, main_page, background_page)
                 return
-            
-            finish_state, error = get_finish_json(base_url, main_page)
+            try:
+                finish_state, error = get_finish_json(base_url, main_page)
+            except Exception as e:
+                print(f"Error getting finish state: {e}")
+                task_result["finish_state_error"] = str(e)
+                task_result["error"] = True
+                with open(results_file, 'w') as f:
+                    json.dump(task_result, f, indent=2)
+                cleanup_playwright(browser, context, main_page, background_page)
+                return
             task_result["finish_state"] = finish_state
             eval_results = check_evals(
                 task_obj['evals'],
