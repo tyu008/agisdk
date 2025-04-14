@@ -91,11 +91,44 @@ use_cdp = True  # Set to False to use Playwright instead
 
 if use_cdp:
     # Run the CDP evaluation
+    # Demonstrate different task selection options:
+    
+    # Option 1: Run all tasks
+    # harness_cdp.run(
+    #     local=True,
+    #     use_cache=True, 
+    #     dir="./results_cdp",
+    #     tasks="all",
+    #     parallel=True,
+    #     num_workers=4
+    # )
+    
+    # Option 2: Run a single specific task
+    # harness_cdp.run(
+    #     local=True,
+    #     use_cache=True,
+    #     dir="./results_cdp",
+    #     tasks="udriver-1",
+    #     parallel=True,
+    #     num_workers=4
+    # )
+    
+    # Option 3: Run all tasks of a specific type
+    # harness_cdp.run(
+    #     local=True,
+    #     use_cache=True,
+    #     dir="./results_cdp",
+    #     tasks="udriver",  # Runs all udriver tasks
+    #     parallel=True,
+    #     num_workers=4
+    # )
+    
+    # Option 4: Run a specific list of tasks
     harness_cdp.run(
         local=True,
         use_cache=True,
         dir="./results_cdp",
-        tasks="all",
+        tasks=["udriver-1", "udriver-2"],  # Run exactly these tasks
         parallel=True,
         num_workers=4
     )

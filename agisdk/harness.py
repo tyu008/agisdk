@@ -46,7 +46,7 @@ class EvalHarness:
             local: bool = True,
             use_cache: bool = True,
             dir: str = "./results",
-            tasks: Union[Literal["all"], List[str]] = "all",
+            tasks: Union[Literal["all"], List[str], str] = "all",
             parallel: bool = True,
             num_workers: int = 4):
         """Run evaluation harness on tasks.
@@ -55,7 +55,11 @@ class EvalHarness:
             local: Run locally
             use_cache: Use cached results if available
             dir: Output directory for results
-            tasks: "all" or list of specific task IDs to run
+            tasks: Task selection, with multiple formats:
+                - "all": Run all available tasks
+                - List[str]: List of specific task IDs to run (e.g. ["udriver-1", "udriver-2"])
+                - str with pattern: Run tasks matching the pattern (e.g. "udriver" runs all udriver tasks)
+                - str with exact ID: Run a single specific task (e.g. "udriver-1")
             parallel: Whether to run tasks in parallel using multiprocessing
             num_workers: Number of parallel worker processes to use
         """
@@ -66,17 +70,36 @@ class EvalHarness:
         # Load all tasks
         all_tasks = []
         tasks_dir = importlib.resources.files("agisdk.tasks")
+        
+        # First, create a list of all available tasks
+        available_tasks = []
         for task_json in tasks_dir.iterdir():
             if task_json.name.endswith('.json'):
                 obj = json.loads(task_json.read_text())
-                # Filter tasks if specific ones are requested
-                if tasks != "all" and obj.get('id') not in tasks:
-                    continue
-                all_tasks.append(obj)
+                available_tasks.append(obj)
+        
+        # Filter tasks based on the tasks parameter
+        if tasks == "all":
+            # Use all tasks
+            all_tasks = available_tasks
+        elif isinstance(tasks, list):
+            # Filter by list of specific task IDs
+            all_tasks = [t for t in available_tasks if t.get('id') in tasks]
+        elif isinstance(tasks, str):
+            # Single task ID or pattern
+            if "-" in tasks:
+                # Specific task ID (e.g., "udriver-1")
+                all_tasks = [t for t in available_tasks if t.get('id') == tasks]
+            else:
+                # Pattern match (e.g., "udriver" to run all udriver tasks)
+                all_tasks = [t for t in available_tasks if tasks in t.get('id', "")]
+                print(f"Pattern '{tasks}' matched {len(all_tasks)} tasks")
         
         if not all_tasks:
             print("No tasks found or matched the filter criteria.")
             return
+        
+        print(f"Selected {len(all_tasks)} tasks: {[t.get('id') for t in all_tasks]}")
             
         print(f"Running {len(all_tasks)} tasks...")
         

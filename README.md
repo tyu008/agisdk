@@ -169,7 +169,11 @@ The `run` method accepts:
 - `local`: Run locally (Boolean)
 - `use_cache`: Use cached results if available (Boolean)
 - `dir`: Output directory for results
-- `tasks`: List of specific tasks or "all" for all tasks
+- `tasks`: Task selection in several formats:
+  - `"all"`: Run all available tasks
+  - `List[str]`: List of specific task IDs (e.g., `["udriver-1", "udriver-2"]`)
+  - `str` pattern: Run tasks matching a pattern (e.g., `"udriver"` runs all udriver tasks)
+  - `str` exact ID: Run a single specific task (e.g., `"udriver-1"`)
 - `parallel`: Run tasks in parallel (Boolean)
 - `num_workers`: Number of parallel workers
 

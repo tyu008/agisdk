@@ -22,7 +22,8 @@ async def browseruse_async_agent(prompt, cdp_url, max_steps, task_dir):
     
     # Configure browser with headless=False for visibility
     browser = Browser(config=BrowserConfig(cdp_url=cdp_url))
-    model = ChatOpenAI(model="gpt-4o", temperature=0.0, api_key=SecretStr(api_key))
+    controller = Controller()
+    model = ChatOpenAI(model="gpt-4o", api_key=SecretStr(api_key))
     
     # Set up the gif path if task_dir is provided
     if task_dir:
@@ -38,9 +39,8 @@ async def browseruse_async_agent(prompt, cdp_url, max_steps, task_dir):
     # Initialize the agent with the task and options
     agent = Agent(
         task=prompt, 
-        use_vision=True,
-        max_actions_per_step=1,
         llm=model, 
+        controller=controller, 
         browser=browser,
         save_conversation_path=save_conversation_path
     )
@@ -84,27 +84,16 @@ harness = EvalHarness(
     agent_fn=browseruse_agent, 
     type="cdp", 
     max_steps=25,
-    headless=False,  # Set to True to run in headless mode    
+    headless=True,  # Set to True to run in headless mode    
 )
 
 # Define a main function to run the harness
 def main():
-    # Choose which tasks to run:
-
-    # Option 1: Run all tasks
-    # harness.run(local=True, use_cache=True, dir="./browseruse", tasks="all", parallel=True, num_workers=4)
-
-    # Option 2: Run a single specific task
-    # harness.run(local=True, use_cache=True, dir="./browseruse", tasks="udriver-1", parallel=True, num_workers=4)
-
-    # Option 3: Run all tasks of a specific type
-    harness.run(local=True, use_cache=True, dir="./udrive", tasks="udriver", parallel=False, num_workers=1)
-
-    # Option 4: Run a specific list of tasks
-    # harness.run(local=True, use_cache=True, dir="./browseruse", tasks=["udriver-1", "udriver-2"], parallel=True, num_workers=4)
+    # Run the harness
+    harness.run(local=True, use_cache=True, dir="./browseruse", tasks="all", parallel=True, num_workers=4)
     
     # Show the results statistics
-    harness.show_results("./browseruse")
+    harness.show_results()
 
 # Proper idiom for multiprocessing
 if __name__ == '__main__':
