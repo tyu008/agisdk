@@ -9,7 +9,7 @@ def _find_free_port():
         s.bind(('', 0))
         return s.getsockname()[1]
 
-def launch_chromium(headless=False):
+def launch_chromium(headless=False, suppress_output=True):
     chromium_path = "chromium"
     user_data_dir = tempfile.mkdtemp(prefix="chrome-profile-")
     cdp_port = _find_free_port()
@@ -22,11 +22,20 @@ def launch_chromium(headless=False):
         "--no-first-run",
         "--remote-allow-origins=*",
         "--no-default-browser-check",
+        "--log-level=3",  # Minimal logging, errors only
+        "--silent-debugger-extension-api",  # Reduce extension API logging
     ]
     if headless:
         args.append("--headless=new")
 
-    subprocess.Popen(args)
+    # Handle output redirection
+    if suppress_output:
+        # Redirect both stdout and stderr to /dev/null (or NUL on Windows)
+        devnull = open(os.devnull, 'w')
+        process = subprocess.Popen(args, stdout=devnull, stderr=devnull)
+    else:
+        process = subprocess.Popen(args)
+        
     print(f"Chromium launched on port {cdp_port}.")
 
     def kill():

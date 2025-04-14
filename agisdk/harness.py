@@ -2,6 +2,8 @@ from typing import Callable, Literal, Optional, Union, List, Dict, Any
 import os
 import importlib.resources
 import json
+import multiprocessing
+from functools import partial
 from .eval import check_evals
 from .cdp_utils import launch_chromium
 from .results_utils import show_results
@@ -20,7 +22,8 @@ class EvalHarness:
     def __init__(self, 
                  agent_fn: Callable[[str, Any], str],
                  type: Literal["url", "playwright", "cdp"] = "playwright",
-                 max_steps: int = 25):
+                 max_steps: int = 25,
+                 headless: bool = False):
         """
         Initialize the evaluation harness.
         
@@ -28,19 +31,34 @@ class EvalHarness:
             agent_fn: Function that implements the agent logic
             type: Type of harness to use (url, playwright, cdp)
             max_steps: Maximum number of steps allowed per task
+            headless: Whether to run browsers in headless mode
         """
         self.agent_fn = agent_fn
         self.type = type
         self.max_steps = max_steps
+        self.headless = headless
+        
+    def _run_task_wrapper(self, task):
+        """Wrapper function to run a single task in a separate process."""
+        return self.run_task(task)
         
     def run(self,
             local: bool = True,
             use_cache: bool = True,
             dir: str = "./results",
             tasks: Union[Literal["all"], List[str]] = "all",
-            paralel: bool = True,
+            parallel: bool = True,
             num_workers: int = 4):
-        """Run evaluation harness on tasks."""
+        """Run evaluation harness on tasks.
+        
+        Args:
+            local: Run locally
+            use_cache: Use cached results if available
+            dir: Output directory for results
+            tasks: "all" or list of specific task IDs to run
+            parallel: Whether to run tasks in parallel using multiprocessing
+            num_workers: Number of parallel worker processes to use
+        """
         self.results_dir = dir
         self.use_cache = use_cache
         os.makedirs(dir, exist_ok=True)
@@ -51,17 +69,41 @@ class EvalHarness:
         for task_json in tasks_dir.iterdir():
             if task_json.name.endswith('.json'):
                 obj = json.loads(task_json.read_text())
-                all_tasks.append(obj)            
+                # Filter tasks if specific ones are requested
+                if tasks != "all" and obj.get('id') not in tasks:
+                    continue
+                all_tasks.append(obj)
         
-        # Run tasks
-        for task in all_tasks:
-            self.run_task(task)
-        print("done")
+        if not all_tasks:
+            print("No tasks found or matched the filter criteria.")
+            return
+            
+        print(f"Running {len(all_tasks)} tasks...")
+        
+        # Run tasks sequentially or in parallel
+        if parallel and num_workers > 1:
+            # Use multiprocessing for parallel execution
+            with multiprocessing.Pool(processes=min(num_workers, len(all_tasks))) as pool:
+                # We don't need to collect results since they're saved to disk
+                pool.map(self._run_task_wrapper, all_tasks)
+            print(f"Completed {len(all_tasks)} tasks in parallel mode with {min(num_workers, len(all_tasks))} workers")
+        else:
+            # Run tasks sequentially
+            for task in all_tasks:
+                self.run_task(task)
+            print(f"Completed {len(all_tasks)} tasks sequentially")
+        
+        print("All tasks completed!")
                         
     def run_task(self, task_obj):
-        """Run a single task and return success status and details."""
+        """Run a single task and save results to disk.
+        
+        Args:
+            task_obj: Task object with task details
+        """
         task_id = task_obj['id']
-        print(f"Running task {task_id}")
+        process_id = os.getpid()
+        print(f"Process {process_id}: Running task {task_id}")
         
         # Create task directory
         task_dir = os.path.join(self.results_dir, task_id)
@@ -78,10 +120,10 @@ class EvalHarness:
                 
                 # Check if task completed successfully with no errors
                 if results.get('completed', False) and not results.get('error'):
-                    print(f"Using cached results for task {task_id}")
-                    return [results.get('success', False), results]
+                    print(f"Process {process_id}: Using cached results for task {task_id}")
+                    return
             except (json.JSONDecodeError, IOError) as e:
-                print(f"Error reading cache for {task_id}: {e}")
+                print(f"Process {process_id}: Error reading cache for {task_id}: {e}")
                 # Continue with execution if cache read fails
         task_result = {
             "completed": False,
@@ -105,22 +147,28 @@ class EvalHarness:
                     task_id=task_id,
                     base_url=base_url,
                     run_id="local",
-                    headless=False,
+                    headless=self.headless,
                 )
             except Exception as e:
-                print(f"Error setting up Playwright: {e}")
+                print(f"Process {process_id}: Error setting up Playwright: {e}")
                 task_result["env_setup_error"] = str(e)
                 task_result["error"] = True
                 with open(results_file, 'w') as f:
                     json.dump(task_result, f, indent=2)
+                print(f"Process {process_id}: Task {task_id} failed")
                 return
             
             try:
-                # Run the agent function and pass the browser instance instead of just the page
-                agent_response = self.agent_fn(task_obj['goal'], browser)
+                # Run the agent function and pass the browser instance along with max_steps and task_dir
+                agent_response = self.agent_fn(
+                    task_obj['goal'], 
+                    browser,
+                    self.max_steps,
+                    task_dir
+                )
                 task_result["agent_response"] = agent_response
             except Exception as e:
-                print(f"Error running agent function: {e}")
+                print(f"Process {process_id}: Error running agent function: {e}")
                 task_result["agent_error"] = str(e)
                 task_result["error"] = True
                 with open(results_file, 'w') as f:
@@ -130,7 +178,7 @@ class EvalHarness:
             try:
                 finish_state, error = get_finish_json(base_url, main_page)
             except Exception as e:
-                print(f"Error getting finish state: {e}")
+                print(f"Process {process_id}: Error getting finish state: {e}")
                 task_result["finish_state_error"] = str(e)
                 task_result["error"] = True
                 with open(results_file, 'w') as f:
@@ -159,11 +207,12 @@ class EvalHarness:
             # save results
             with open(results_file, 'w') as f:
                 json.dump(task_result, f, indent=2)
+            print(f"Process {process_id}: Task {task_id} completed successfully (Playwright)")
             cleanup_playwright(browser, context, main_page, background_page)
         
         elif self.type == "cdp":
             # Start CDP with cdp_utils
-            kill_cdp, cdp_port = launch_chromium(headless=False)
+            kill_cdp, cdp_port = launch_chromium(headless=self.headless, suppress_output=True)
             
             import requests
             import websocket
@@ -234,6 +283,7 @@ class EvalHarness:
                 kill_cdp()
                 with open(results_file, 'w') as f:
                     json.dump(task_result, f, indent=2)
+                print(f"Process {process_id}: Task {task_id} failed")
                 return
             
             # Run the agent function
@@ -241,11 +291,16 @@ class EvalHarness:
             ws.close()
             cdp_url = f"http://localhost:{cdp_port}"
             try:
-                # Run the agent function with CDP port instead of Playwright page
-                agent_response = self.agent_fn(task_obj['goal'], cdp_url)
+                # Run the agent function with CDP port along with max_steps and task_dir
+                agent_response = self.agent_fn(
+                    task_obj['goal'], 
+                    cdp_url, 
+                    self.max_steps,
+                    task_dir
+                )
                 task_result["agent_response"] = agent_response
             except Exception as e:
-                print(f"Error running agent function: {e}")
+                print(f"Process {process_id}: Error running agent function: {e}")
                 task_result["agent_error"] = str(e)
                 task_result["error"] = True
                 with open(results_file, 'w') as f:
@@ -253,7 +308,7 @@ class EvalHarness:
                 ws.close()
                 kill_cdp()
                 return
-            print("Agent finished running, back to harness ")
+            print(f"Process {process_id}: Agent finished running, back to harness")
             
             # Reconnect to the WebSocket
             ws = websocket.create_connection(ws_url)
@@ -308,7 +363,7 @@ class EvalHarness:
                 trace_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
                 error_trace = "".join(trace_details)
                 
-                print(f"Error getting finish state: {e}")
+                print(f"Process {process_id}: Error getting finish state: {e}")
                 print(f"Error type: {exc_type.__name__}")
                 print(f"Full traceback:\n{error_trace}")
                 
@@ -321,6 +376,7 @@ class EvalHarness:
                 kill_cdp()
                 with open(results_file, 'w') as f:
                     json.dump(task_result, f, indent=2)
+                print(f"Process {process_id}: Task {task_id} failed")
                 return
                 
             task_result["finish_state"] = finish_state
@@ -347,6 +403,7 @@ class EvalHarness:
             kill_cdp()
             with open(results_file, 'w') as f:
                 json.dump(task_result, f, indent=2)
+            print(f"Process {process_id}: Task {task_id} completed successfully (CDP)")
             return
         
         else:
