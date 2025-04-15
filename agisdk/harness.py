@@ -190,6 +190,21 @@ class EvalHarness:
                     task_dir
                 )
                 task_result["agent_response"] = agent_response
+                
+                # Add submission step for Playwright
+                import urllib.parse
+                # Handle None or empty response
+                if agent_response is None or agent_response.strip() == "":
+                    encoded_response = "None"
+                else:
+                    encoded_response = urllib.parse.quote(agent_response)
+                    
+                submit_url = f"{base_url}/submit?retrieved_answer={encoded_response}"
+                main_page.goto(submit_url)
+                # Wait for submission to complete
+                import time
+                time.sleep(3)
+                
             except Exception as e:
                 print(f"Process {process_id}: Error running agent function: {e}")
                 task_result["agent_error"] = str(e)
@@ -243,7 +258,7 @@ class EvalHarness:
             # setup the connection and navigate to the task URL + config
             try:
                 # Wait for Chrome to start up
-                time.sleep(2)
+                time.sleep(3)
                 
                 # Get task website details
                 base_url = task_obj['website']['url']
@@ -281,7 +296,7 @@ class EvalHarness:
                 ws.recv()  # Get navigation response
                 
                 # Wait for page to load
-                time.sleep(2)
+                time.sleep(3)
                 
                 # Navigate to the main task URL
                 navigate_cmd = {
@@ -295,7 +310,7 @@ class EvalHarness:
                 ws.recv()  # Get navigation response
                 
                 # Wait for page to load
-                time.sleep(2)
+                time.sleep(3)
             except Exception as e:
                 print(f"Error setting up CDP: {e}")
                 task_result["env_setup_error"] = str(e)
@@ -322,6 +337,38 @@ class EvalHarness:
                     task_dir
                 )
                 task_result["agent_response"] = agent_response
+                
+                # Reconnect to the WebSocket for submission
+                ws = websocket.create_connection(ws_url)
+                
+                # Add submission step for CDP
+                import urllib.parse
+                # Handle None or empty response
+                if agent_response is None or agent_response.strip() == "":
+                    encoded_response = "None"
+                else:
+                    encoded_response = urllib.parse.quote(agent_response)
+                    
+                submit_url = f"{base_url}/submit?retrieved_answer={encoded_response}"
+                
+                # Navigate to the submit URL
+                submit_cmd = {
+                    "id": 5,
+                    "method": "Page.navigate",
+                    "params": {
+                        "url": submit_url
+                    }
+                }
+                
+                ws.send(json.dumps(submit_cmd))
+                ws.recv()  # Get navigation response
+                
+                # Wait for submission to complete
+                time.sleep(3)
+                
+                # Close the WebSocket after submission
+                ws.close()
+                
             except Exception as e:
                 print(f"Process {process_id}: Error running agent function: {e}")
                 task_result["agent_error"] = str(e)
