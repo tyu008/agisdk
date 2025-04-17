@@ -8,9 +8,10 @@ import os
 import logging
 from typing import Optional, Union
 import uuid
+from pathlib import Path
 
 from agisdk.real.browsergym.experiments import EnvArgs, ExpArgs
-from agisdk.real.browsergym.experiments.loop import run as run_experiment
+# No need to import run, we'll use exp_args.run() directly
 from agisdk.real.demo_agent.basic_agent import DemoAgentArgs
 from agisdk.real.browsergym.experiments import AbstractAgentArgs
 
@@ -87,7 +88,7 @@ def harness(
     class Harness:
         def __init__(self, exp_args, results_dir, run_id, leaderboard):
             self.exp_args = exp_args
-            self.results_dir = results_dir
+            self.results_dir = str(Path(results_dir).absolute())
             self.run_id = run_id
             self.leaderboard = leaderboard
         
@@ -99,7 +100,7 @@ def harness(
             self.exp_args.prepare(self.results_dir)
             
             # Run the experiment
-            run_experiment(self.exp_args)
+            self.exp_args.run()
             
             # TODO: If leaderboard is True, submit results
             if self.leaderboard:
