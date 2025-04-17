@@ -1,4 +1,6 @@
 from . import browsergym
+from .harness import harness
+
 def hello(name="World"):
     """A real greeting function for the real submodule."""
     message = f"Hello {name}, from the real world!"
