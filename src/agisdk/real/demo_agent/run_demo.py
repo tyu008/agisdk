@@ -4,7 +4,7 @@ import argparse
 from agisdk.real.browsergym.experiments import EnvArgs, ExpArgs, get_exp_result
 
 # locally defined agent
-from basic_agent import DemoAgentArgs
+from .basic_agent import DemoAgentArgs
 
 
 def str2bool(v):

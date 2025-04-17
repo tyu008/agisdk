@@ -1,1 +1,2 @@
-from . import basic_agent, run_demo
+from . import basic_agent
+from . import run_demo
