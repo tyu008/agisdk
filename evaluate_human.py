@@ -91,7 +91,7 @@ def main():
     args = parse_args()
     
     # Determine which tasks to run
-    if args.task_name and not args.task_name.startswith("webclones."):
+    if args.task_name:
         # If a direct task name is provided, use it (taking precedence)
         tasks = [args.task_name]
     else:

@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import List, Dict, Optional, Any
 
 # Import the agent and core functionality
-import scripts.realeval_agents  # This registers the agents
-from scripts.realeval import (
+import realeval_agents  # This registers the agents
+from realeval import (
     create_agent_args, 
     get_tasks, 
     run_tasks, 
