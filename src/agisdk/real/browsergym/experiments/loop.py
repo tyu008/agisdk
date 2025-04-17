@@ -820,16 +820,20 @@ def _get_env_name(task_name: str):
     """Register tasks if needed (lazy import) and return environment name."""
 
     # lazy benchmark import
-    if task_name.startswith("miniwob"):
-        import browsergym.miniwob
-    elif task_name.startswith("workarena"):
-        import browsergym.workarena
-    elif task_name.startswith("webarena"):
-        import browsergym.webarena
-    elif task_name.startswith("visualwebarena"):
-        import browsergym.visualwebarena
-    elif task_name.startswith("webclones"):
-        import browsergym.webclones
+    # if task_name.startswith("miniwob"):
+    #     import browsergym.miniwob
+    # elif task_name.startswith("workarena"):
+    #     import browsergym.workarena
+    # elif task_name.startswith("webarena"):
+    #     import browsergym.webarena
+    # elif task_name.startswith("visualwebarena"):
+    #     import browsergym.visualwebarena
+    if task_name.startswith("webclones"):
+        import agisdk.real.browsergym.webclones
+    else:
+        raise ValueError(
+            f"Task {task_name} not found. Please register the task in browsergym."
+        )
 
     return f"browsergym/{task_name}"
 

@@ -48,7 +48,7 @@ def create_agent_args(agent_type: str, **kwargs) -> AbstractAgentArgs:
 
 def get_available_task_types() -> List[str]:
     """Get all available task types from the tasks directory."""
-    tasks_dir = Path(__file__).parent.parent / "browsergym" / "webclones" / "tasks"
+    tasks_dir = Path(__file__).parent / "src" / "agisdk" / "real" / "browsergym" / "webclones" / "tasks"
     
     # Get all JSON files in the main tasks directory (excluding the alt subdirectory)
     json_files = [f for f in glob.glob(f"{tasks_dir}/*.json")]
@@ -86,7 +86,7 @@ def get_tasks(
     Returns:
         List of task names formatted as 'webclones.{task_type}-{task_id}'
     """
-    tasks_dir = Path(__file__).parent.parent / "browsergym" / "webclones" / "tasks"
+    tasks_dir = Path(__file__).parent / "src" / "agisdk" / "real" / "browsergym" / "webclones" / "tasks"
     
     # Get all JSON files in the main tasks directory (excluding the alt subdirectory)
     json_files = [f for f in glob.glob(f"{tasks_dir}/*.json") if "/alt/" not in f]

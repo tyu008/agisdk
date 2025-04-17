@@ -11,8 +11,7 @@ from typing import Dict, Any, Optional
 from dataclasses import dataclass, asdict
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_PATH = os.path.normpath(os.path.join(CURRENT_DIR, "..", "..", ".."))
-TASK_DIR = os.path.join(BASE_PATH, "tasks")
+TASK_DIR = os.path.join(CURRENT_DIR, "tasks")
 TASKS = [task.split(".")[0] for task in os.listdir(TASK_DIR)]
 
 @dataclass
@@ -102,7 +101,7 @@ class TaskConfig:
         :param id: The id of the task.
         :return: The task configuration as a dictionary.
         """
-        path = f"{BASE_PATH}/tasks/{id}.json"
+        path = os.path.join(TASK_DIR, f"{id}.json")
         if not os.path.exists(path):
             raise FileNotFoundError(f"Task configuration file not found: {path}")
         return self.from_json_file(path)
