@@ -1,0 +1,7 @@
+browsergym-core==0.8.0
+requests
+beautifulsoup4
+jmespath
+openai
+openrouter
+anthropic

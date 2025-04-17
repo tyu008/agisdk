@@ -1,0 +1,46 @@
+[tool.black]
+line-length = 100
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.nox
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    'ignore::UserWarning:gymnasium.*:',  # too many "The obs is not within the observation space." warnings.
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "serial: mark test to be run sequantially (deselect with '-m \"not serial\"')"
+]
+
+[project]
+name = "realbench"
+version = "0.1.0"
+description = "A Miniature Internet Environment for evaluating agents."
+authors = [
+    {name = "Div Garg (div@theagi.company)"}
+]
+readme = "README.md"
+requires-python = ">=3.11,<4"
+dependencies = [
+    "browsergym (>=0.13.3,<0.14.0)",
+    "playwright (>=1.50.0,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
