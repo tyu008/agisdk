@@ -9,17 +9,17 @@
 
 ## Tasks
 
-- [ ] Add more tasks
-- [ ] Expand local task harness
-- [ ] Create task subcategories
-- [ ] Add difficulty levels to tasks
-- [ ] Create benchmarking suite for task performance comparison
+- [X] Add more tasks
+- [X] Expand local task harness
+- [X] Create task subcategories
+- [ Skip ] Add difficulty levels to tasks
+- [ Skip ] Create benchmarking suite for task performance comparison
 
 ## Documentation
 
-- [ ] Fill documentation for evaluation and final states
+- [ Skip ] Fill documentation for evaluation and final states
 
 
 ## Future Enhancements
 
-- [ ] Add analytics functionality to track urls, website usage, etc.
+- [ Skip ] Add analytics functionality to track urls, website usage, etc.
