@@ -164,16 +164,28 @@ class DemoAgent(Agent):
                         ],
                     )
                 else:
+                    # Format messages properly - extract text content
+                    formatted_messages = []
+                    if system_msgs:
+                        formatted_messages.append({"role": "system", "content": system_msgs[0]["text"]})
+                    
+                    # Convert user messages to OpenAI format
+                    user_content = []
+                    for msg in user_msgs:
+                        if msg["type"] == "text":
+                            user_content.append({"type": "text", "text": msg["text"]})
+                        elif msg["type"] == "image_url":
+                            user_content.append({"type": "image_url", "image_url": msg["image_url"]})
+                    
+                    formatted_messages.append({"role": "user", "content": user_content})
+                    
                     response = self.client.chat.completions.create(
                         extra_headers={
                             "HTTP-Referer": self.openrouter_site_url,
                             "X-Title": self.openrouter_site_name,
                         },
                         model=self.model_name,
-                        messages=[
-                            {"role": "system", "content": system_msgs},
-                            {"role": "user", "content": user_msgs},
-                        ],
+                        messages=formatted_messages,
                     )
                 return response.choices[0].message.content
             self.query_model = query_model
