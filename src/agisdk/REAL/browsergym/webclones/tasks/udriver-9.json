@@ -6,7 +6,7 @@
     "name": "UDriver",
     "similarTo": "Uber",
     "previewImage": "/websitePreviews/udriver_preview.jpg",
-    "url": "https://evals-udriver.vercel.app/"
+    "url": "https://real-udriver.vercel.app/"
   },
   "difficulty": "hard",
   "challengeType": "retrieval-action",

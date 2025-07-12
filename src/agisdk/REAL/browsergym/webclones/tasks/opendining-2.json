@@ -6,7 +6,7 @@
     "name": "OpenDining",
     "similarTo": "OpenTable",
     "previewImage": "/websitePreviews/opendining_preview.jpg",
-    "url": "https://evals-opendining.vercel.app/"
+    "url": "https://real-opendining.vercel.app/"
   },
   "difficulty": "easy",
   "challengeType": "retrieval-action",

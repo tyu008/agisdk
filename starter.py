@@ -1,14 +1,14 @@
-import os
 from src.agisdk import REAL
 
 def run_agent(api_key=None, run_name=None):
     harness = REAL.harness(
         model="openrouter/x-ai/grok-4",
-        headless=False,
-        max_steps=15,
+        headless=True,
+        max_steps=25,
         use_screenshot=True,
         use_axtree=True,
-        task_name="webclones.udriver-9"
+        run_id="673a6de2-09a1-4fc4-999e-b52c17c4e5a3",
+        num_workers=8
     )
     return harness.run()
 
