@@ -29,7 +29,7 @@ Let’s look at an evaluator in the REAL leaderboard to get an idea for how to w
     "name": "Zilloft",
     "similarTo": "Zillow",
     "previewImage": "/websitePreviews/zilloft_preview.jpg",
-    "url": "https://real-topwork.vercel.app/"
+    "url": "https://real-topwork-di5dy23op-real-sites.vercel.app/"
   },
   "difficulty": "hard",
   "challengeType": "retrieval-action",
