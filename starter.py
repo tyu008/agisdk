@@ -1,14 +1,14 @@
-from src.agisdk import REAL
+from agisdk import REAL
 
 def run_agent(api_key=None, run_name=None):
     harness = REAL.harness(
-        model="openrouter/x-ai/grok-4",
-        headless=True,
+        model="gpt-4o",
+        headless=False,
         max_steps=25,
         use_screenshot=True,
         use_axtree=True,
-        run_id="673a6de2-09a1-4fc4-999e-b52c17c4e5a3",
-        num_workers=8
+        leaderboard=True,
+        num_workers=1
     )
     return harness.run()
 
