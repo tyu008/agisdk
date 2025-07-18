@@ -328,11 +328,11 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
                 env_state = {}
 
             ev = WebCloneEvaluator(TaskConfig(tid))
-            reward, done, msg, _ = ev.evaluate(env_state=env_state, model_response=model_ans)
+            reward, _, msg, _ = ev.evaluate(env_state=env_state, model_response=model_ans)
             rich_logger.info(f"🌍 Environment State: {json.dumps(env_state, indent=2)[:200]}...")
             rich_logger.info(f"🤖 Model Response: {model_ans[:100]}{'...' if len(model_ans) > 100 else ''}")
             
-            success = bool(done and reward > 0)
+            success = reward > 0
             res["success"] = success
             res["ok"] = True
             res["reward"] = reward
@@ -359,7 +359,8 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
 
 def create_results_directory() -> Path:
     """Create results directory structure similar to agisdk."""
-    results_dir = Path("/Users/pran-ker/Developer/agisdk/results")
+    # Use relative path from the agisdk root
+    results_dir = Path("results")
     results_dir.mkdir(parents=True, exist_ok=True)
     
     # Create timestamped subdirectory
