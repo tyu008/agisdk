@@ -78,7 +78,8 @@ class PlaywrightComputer:
             "CTRL": "Control",
             "ALT": "Alt",
             "SHIFT": "Shift",
-            "META": "Meta"
+            "META": "Meta",
+            "CMD": "Meta"
         }
         
         mapped_keys = [key_mapping.get(key, key) for key in keys]
@@ -326,7 +327,7 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
             
             # Log task completion
             elapsed = time.time() - wall0
-            rich_logger.task_complete(success, reward, elapsed)
+            rich_logger.task_complete(success, reward, elapsed, tid)
             
             # Save final state to base_url/final
             final_url = f"{base}/final"
@@ -345,7 +346,7 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
         res["error"] = str(exc)
         elapsed = time.time() - wall0
         rich_logger.error(f"Task {tid} failed: {exc}")
-        rich_logger.task_complete(False, 0, elapsed)
+        rich_logger.task_complete(False, 0, elapsed, tid)
 
     res["elapsed_time"] = time.time() - wall0
     res["end_time"] = datetime.now(timezone.utc).isoformat()
