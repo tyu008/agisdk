@@ -9,10 +9,14 @@ import glob
 import random
 import json
 import time
+import uuid
 import logging
 from typing import List, Dict, Optional, Any, Tuple
 from pathlib import Path
 from statistics import mean, median, stdev
+
+# Rich logging support
+from agisdk.REAL.logging import logger as rich_logger
 
 # Ray imports for distributed execution
 try:
@@ -44,8 +48,9 @@ if RAY_AVAILABLE:
         import json
         from pathlib import Path
         from agisdk.REAL.browsergym.experiments import EnvArgs, ExpArgs, get_exp_result
+        from agisdk.REAL.logging import logger as rich_logger
         
-        print(f"Running task: {task_name}")
+        rich_logger.info(f"Running task: {task_name}")
         
         # Set task name in env args
         env_args_dict["task_name"] = task_name
@@ -105,12 +110,11 @@ if RAY_AVAILABLE:
         # Add experiment directory to the record
         exp_record['exp_dir'] = str(exp_args.exp_dir)
         
-        # Print current task result
-        print(f"Task: {task_name}")
-        print(f"  Reward: {exp_record.get('cum_reward', 0)}")
+        # Print current task result using Rich logging
         success = exp_record.get('cum_reward', 0) == 1
-        print(f"  Success: {success}")
-        print(f"  Time: {elapsed_time:.2f} seconds")
+        reward = exp_record.get('cum_reward', 0)
+        
+        rich_logger.task_complete(success, reward, elapsed_time)
         
         return task_name, exp_record
 
@@ -119,18 +123,6 @@ logger = logging.getLogger(__name__)
 class harness:
     """
     A simplified harness for running browsergym tasks with various agents.
-    
-    Example usage with built-in agent (sequential):
-        harness = REAL.harness(model="gpt-4o", num_workers=1)
-        results = harness.run()
-        
-    Example usage with Ray distributed execution:
-        harness = REAL.harness(model="gpt-4o", num_workers=4)
-        results = harness.run()
-        
-    Example usage with custom agent:
-        harness = REAL.harness(agentargs=YourAgentArgs(), num_workers=2)
-        results = harness.run()
     """
     
     def __init__(
@@ -220,8 +212,9 @@ class harness:
             if system_message_handling is not None:
                 use_system_message_handling = system_message_handling
             else:
-                use_system_message_handling = "combined" if model == "o1-mini" else "separate"
-                
+                # Default to "separate" unless using o1-mini which requires "combined"
+                use_system_message_handling = "combined" if "o1-mini" in model.lower() else "separate"
+            
             self.agent_args = DemoAgentArgs(
                 model_name=model,
                 chat_mode=False,
@@ -341,7 +334,7 @@ class harness:
     def _format_results(self, results: Dict[str, Any]) -> None:
         """Format and print benchmark results."""
         if not results:
-            print("No results to display.")
+            rich_logger.warning("No results to display.")
             return
         
         # Calculate aggregate score
@@ -352,28 +345,28 @@ class harness:
         all_times = [r.get('elapsed_time', 0) for _, r in results.items()]
         successful_times = [r.get('elapsed_time', 0) for _, r in results.items() if r.get('cum_reward', 0) == 1]
         
-        print("\n===== BENCHMARK RESULTS =====")
-        print(f"Tasks completed successfully: {success_count}/{len(results)}")
-        print(f"Success rate: {success_rate:.2f}%")
+        rich_logger.success("BENCHMARK RESULTS")
+        rich_logger.info(f"Tasks completed successfully: {success_count}/{len(results)}")
+        rich_logger.info(f"Success rate: {success_rate:.2f}%")
         
         # Print timing statistics
         if all_times:
-            print("\nTiming Statistics (All Tasks):")
-            print(f"  Average time: {mean(all_times):.2f} seconds")
-            print(f"  Median time: {median(all_times):.2f} seconds")
-            print(f"  Min time: {min(all_times):.2f} seconds")
-            print(f"  Max time: {max(all_times):.2f} seconds")
+            rich_logger.header("Timing Statistics")
+            rich_logger.info(f"Average time: {mean(all_times):.2f} seconds")
+            rich_logger.info(f"Median time: {median(all_times):.2f} seconds")
+            rich_logger.info(f"Min time: {min(all_times):.2f} seconds")
+            rich_logger.info(f"Max time: {max(all_times):.2f} seconds")
             if len(all_times) > 1:
-                print(f"  Std deviation: {stdev(all_times):.2f} seconds")
+                rich_logger.info(f"Std deviation: {stdev(all_times):.2f} seconds")
         
         if successful_times:
-            print("\nTiming Statistics (Successful Tasks Only):")
-            print(f"  Average time: {mean(successful_times):.2f} seconds")
-            print(f"  Median time: {median(successful_times):.2f} seconds")
-            print(f"  Min time: {min(successful_times):.2f} seconds")
-            print(f"  Max time: {max(successful_times):.2f} seconds")
+            rich_logger.header("Timing Statistics (Successful Tasks Only)")
+            rich_logger.info(f"Average time: {mean(successful_times):.2f} seconds")
+            rich_logger.info(f"Median time: {median(successful_times):.2f} seconds")
+            rich_logger.info(f"Min time: {min(successful_times):.2f} seconds")
+            rich_logger.info(f"Max time: {max(successful_times):.2f} seconds")
             if len(successful_times) > 1:
-                print(f"  Std deviation: {stdev(successful_times):.2f} seconds")
+                rich_logger.info(f"Std deviation: {stdev(successful_times):.2f} seconds")
         
         # Group results by task type
         task_type_results = {}
@@ -563,7 +556,7 @@ class harness:
             "total_tasks": len(tasks),
             "leaderboard": self.leaderboard if hasattr(self, "leaderboard") else False
         }
-        print(f"Starting run with ID: {run_uuid}")
+        rich_logger.info(f"🆔 Starting run with ID: {run_uuid}")
         
         # Initialize results dictionary
         results = {}
@@ -578,7 +571,7 @@ class harness:
                 
                 if cached_result:
                     # Use cached result
-                    print(f"Using cached result for {task_name} from {cached_result.get('exp_dir', 'unknown')}")
+                    rich_logger.info(f"💾 Using cached result for {task_name} from {cached_result.get('exp_dir', 'unknown')}")
                     results[task_name] = cached_result
                 elif not cache_only:
                     # Need to run this task
@@ -592,16 +585,18 @@ class harness:
         
         # Run tasks if needed
         if tasks_to_run:
-            print(f"Running {len(tasks_to_run)} tasks...")
-            print(f"Number of workers configured: {num_workers}")
+            rich_logger.info(f"🏃 Running {len(tasks_to_run)} tasks...")
+            rich_logger.info(f"💻 Number of workers configured: {num_workers}")
             
             if num_workers > 1:
                 if not RAY_AVAILABLE:
                     raise RuntimeError("Ray is required for parallel execution but not available. Please install Ray with: pip install ray")
                 
                 if not ray.is_initialized():
-                    # Initialize Ray with memory tokens as concurrency limit
-                    ray.init(resources={"memory_gb": num_workers})
+                    # Initialize Ray with memory tokens as concurrency limit and suppress verbose logging
+                    ray.init(
+                        resources={"memory_gb": num_workers}
+                    )
                 
                 # Submit all tasks as futures - Ray will queue them based on memory_gb availability
                 ray_futures = [
@@ -761,12 +756,11 @@ class harness:
         # Add experiment directory to the record
         exp_record['exp_dir'] = str(exp_args.exp_dir)
         
-        # Print current task result
-        print(f"Task: {task_name}")
-        print(f"  Reward: {exp_record.get('cum_reward', 0)}")
+        # Print current task result using Rich logging
         success = exp_record.get('cum_reward', 0) == 1
-        print(f"  Success: {success}")
-        print(f"  Time: {elapsed_time:.2f} seconds")
+        reward = exp_record.get('cum_reward', 0)
+        
+        rich_logger.task_complete(success, reward, elapsed_time)
         
         return task_name, exp_record
     
@@ -826,7 +820,7 @@ class harness:
         
         # Always skip results with errors
         if has_error:
-            print(f"Skipping cached result for {task_name} due to errors, will rerun")
+            rich_logger.warning(f"⚠️ Skipping cached result for {task_name} due to errors, will rerun")
             return None
             
         return result

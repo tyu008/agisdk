@@ -1,6 +1,6 @@
 {
-  "id": "hello",
-  "goal": "Like the first post on the homepage feed.",
+  "id": "networkin-1",
+  "goal": "Click on my profile and then go back to the home page",
   "website": {
     "id": "networkin",
     "name": "Networkin",

@@ -1,41 +1,35 @@
 #!/usr/bin/env python3
-import dataclasses
-from typing import Dict, Tuple, Union, Optional
-
-from agisdk import REAL
-
+import argparse
 import base64
 import dataclasses
-import numpy as np
 import io
 import logging
-
-from PIL import Image
 from typing import Literal
 
-# Import str2bool function for boolean command line arguments
-from agisdk.REAL.demo_agent.run_demo import str2bool
+import numpy as np
+from openai import OpenAI
+from PIL import Image
 
+from agisdk import REAL
+from agisdk.REAL.demo_agent.run_demo import str2bool
 from agisdk.REAL.browsergym.experiments import Agent, AbstractAgentArgs
 from agisdk.REAL.browsergym.core.action.highlevel import HighLevelActionSet
-from agisdk.REAL.browsergym.core.action.python import PythonActionSet
 from agisdk.REAL.browsergym.utils.obs import flatten_axtree_to_str, flatten_dom_to_str, prune_html
 
 logger = logging.getLogger(__name__)
 
-# Handling Screenshots
-def image_to_jpg_base64_url(image: np.ndarray | Image.Image):
-    """Convert a numpy array to a base64 encoded image url."""
 
+def image_to_jpg_base64_url(image: np.ndarray | Image.Image) -> str:
+    """Convert image to base64 encoded JPEG URL."""
     if isinstance(image, np.ndarray):
         image = Image.fromarray(image)
     if image.mode in ("RGBA", "LA"):
         image = image.convert("RGB")
-
+    
     with io.BytesIO() as buffer:
         image.save(buffer, format="JPEG")
         image_base64 = base64.b64encode(buffer.getvalue()).decode()
-
+    
     return f"data:image/jpeg;base64,{image_base64}"
 
 
@@ -43,7 +37,6 @@ class DemoAgent(Agent):
     """A basic agent using OpenAI API, to demonstrate BrowserGym's functionalities."""
 
     def obs_preprocessor(self, obs: dict) -> dict:
-
         return {
             "chat_messages": obs["chat_messages"],
             "screenshot": obs["screenshot"],
@@ -72,64 +65,25 @@ class DemoAgent(Agent):
         self.system_message_handling = system_message_handling
 
         if not (use_html or use_axtree):
-            raise ValueError(f"Either use_html or use_axtree must be set to True.")
+            raise ValueError("Either use_html or use_axtree must be set to True.")
 
-        from openai import OpenAI
-        import os
-
-        # Initialize OpenAI client for GPT-4o
         self.client = OpenAI()
-        self.model_name = "gpt-4o"  # Always use GPT-4o regardless of input model_name
-        
-        # Define function to query OpenAI models
-        def query_model(system_msgs, user_msgs):
-            if self.system_message_handling == "combined":
-                # Combine system and user messages into a single user message
-                combined_content = ""
-                if system_msgs:
-                    combined_content += system_msgs[0]["text"] + "\n\n"
-                for msg in user_msgs:
-                    if msg["type"] == "text":
-                        combined_content += msg["text"] + "\n"
-                response = self.client.chat.completions.create(
-                    model=self.model_name,
-                    messages=[
-                        {"role": "user", "content": combined_content},
-                    ],
-                )
-            else:
-                response = self.client.chat.completions.create(
-                    model=self.model_name,
-                    messages=[
-                        {"role": "system", "content": system_msgs},
-                        {"role": "user", "content": user_msgs},
-                    ],
-                )
-            return response.choices[0].message.content
-        self.query_model = query_model
+        self.model_name = "gpt-4o"
 
         self.action_set = HighLevelActionSet(
-            subsets=["chat", "bid", "infeas"],  # define a subset of the action space
-            # subsets=["chat", "bid", "coord", "infeas"] # allow the agent to also use x,y coordinates
-            strict=False,  # less strict on the parsing of the actions
-            multiaction=False,  # does not enable the agent to take multiple actions at once
-            demo_mode=demo_mode,  # add visual effects
+            subsets=["chat", "bid", "infeas"],
+            strict=False,
+            multiaction=False,
+            demo_mode=demo_mode,
         )
-        # use this instead to allow the agent to directly use Python code
-        # self.action_set = PythonActionSet())
-
         self.action_history = []
 
-    def get_action(self, obs: dict) -> tuple[str, dict]:
-        system_msgs = []
-        user_msgs = []
-
+    def _build_system_messages(self) -> list[dict]:
+        """Build system messages based on chat mode."""
         if self.chat_mode:
-            system_msgs.append(
-                {
-                    "type": "text",
-                    "text": f"""\
-# Instructions
+            return [{
+                "type": "text",
+                "text": """# Instructions
 
 You are a UI Assistant, your goal is to help the user perform tasks using a web browser. You can
 communicate with the user via a chat, to which the user gives you instructions and to which you
@@ -138,113 +92,66 @@ and with which only you can interact via specific commands.
 
 Review the instructions from the user, the current state of the page and all other information
 to find the best possible next action to accomplish your goal. Your answer will be interpreted
-and executed by a program, make sure to follow the formatting instructions.
-""",
-                }
-            )
-            # append chat messages
-            user_msgs.append(
-                {
-                    "type": "text",
-                    "text": f"""\
-# Chat Messages
-""",
-                }
-            )
+and executed by a program, make sure to follow the formatting instructions."""
+            }]
+        else:
+            return [{
+                "type": "text",
+                "text": """# Instructions
+
+Review the current state of the page and all other information to find the best
+possible next action to accomplish your goal. Your answer will be interpreted
+and executed by a program, make sure to follow the formatting instructions."""
+            }]
+    
+    def _build_user_messages(self, obs: dict) -> list[dict]:
+        """Build user messages from observation."""
+        user_msgs = []
+        
+        if self.chat_mode:
+            user_msgs.append({"type": "text", "text": "# Chat Messages"})
             for msg in obs["chat_messages"]:
                 if msg["role"] in ("user", "assistant", "infeasible"):
-                    user_msgs.append(
-                        {
-                            "type": "text",
-                            "text": f"""\
-- [{msg['role']}] {msg['message']}
-""",
-                        }
-                    )
+                    user_msgs.append({
+                        "type": "text",
+                        "text": f"- [{msg['role']}] {msg['message']}"
+                    })
                 elif msg["role"] == "user_image":
                     user_msgs.append({"type": "image_url", "image_url": msg["message"]})
                 else:
                     raise ValueError(f"Unexpected chat message role {repr(msg['role'])}")
-
         else:
             assert obs["goal_object"], "The goal is missing."
-            system_msgs.append(
-                {
-                    "type": "text",
-                    "text": f"""\
-# Instructions
-
-Review the current state of the page and all other information to find the best
-possible next action to accomplish your goal. Your answer will be interpreted
-and executed by a program, make sure to follow the formatting instructions.
-""",
-                }
-            )
-            # append goal
-            user_msgs.append(
-                {
-                    "type": "text",
-                    "text": f"""\
-# Goal
-""",
-                }
-            )
-            # goal_object is directly presented as a list of openai-style messages
+            user_msgs.append({"type": "text", "text": "# Goal"})
             user_msgs.extend(obs["goal_object"])
-
-        # append page AXTree (if asked)
+        
         if self.use_axtree:
-            user_msgs.append(
-                {
-                    "type": "text",
-                    "text": f"""\
-# Current page Accessibility Tree
-
-{obs["axtree_txt"]}
-
-""",
-                }
-            )
-        # append page HTML (if asked)
+            user_msgs.append({
+                "type": "text",
+                "text": f"# Current page Accessibility Tree\n\n{obs['axtree_txt']}"
+            })
+        
         if self.use_html:
-            user_msgs.append(
-                {
-                    "type": "text",
-                    "text": f"""\
-# Current page DOM
-
-{obs["pruned_html"]}
-
-""",
-                }
-            )
-
-        # append page screenshot (if asked)
+            user_msgs.append({
+                "type": "text",
+                "text": f"# Current page DOM\n\n{obs['pruned_html']}"
+            })
+        
         if self.use_screenshot:
-            user_msgs.append(
-                {
-                    "type": "text",
-                    "text": """\
-# Current page Screenshot
-""",
-                }
-            )
-            user_msgs.append(
+            user_msgs.extend([
+                {"type": "text", "text": "# Current page Screenshot"},
                 {
                     "type": "image_url",
                     "image_url": {
                         "url": image_to_jpg_base64_url(obs["screenshot"]),
                         "detail": "auto",
-                    },  # Literal["low", "high", "auto"] = "auto"
+                    }
                 }
-            )
-
-        # append action space description
-        user_msgs.append(
-            {
-                "type": "text",
-                "text": f"""\
-# Action Space
+            ])
+        
+        user_msgs.append({
+            "type": "text",
+            "text": f"""# Action Space
 
 {self.action_set.describe(with_long_description=False, with_examples=True)}
 
@@ -254,59 +161,56 @@ I now need to click on the Submit button to send the form. I will use the click 
 ```click("12")```
 
 I found the information requested by the user, I will send it to the chat.
-```send_msg_to_user("The price for a 15\\" laptop is 1499 USD.")```
-
-""",
-            }
-        )
-
-        # append past actions (and last error message) if any
+```send_msg_to_user("The price for a 15\\" laptop is 1499 USD.")```"""
+        })
+        
         if self.action_history:
-            user_msgs.append(
-                {
-                    "type": "text",
-                    "text": f"""\
-# History of past actions
-""",
-                }
-            )
-            user_msgs.extend(
-                [
-                    {
-                        "type": "text",
-                        "text": f"""\
-{action}
-""",
-                    }
-                    for action in self.action_history
-                ]
-            )
-
+            user_msgs.append({"type": "text", "text": "# History of past actions"})
+            user_msgs.extend([{"type": "text", "text": action} for action in self.action_history])
+            
             if obs["last_action_error"]:
-                user_msgs.append(
-                    {
-                        "type": "text",
-                        "text": f"""\
-# Error message from last action
+                user_msgs.append({
+                    "type": "text",
+                    "text": f"# Error message from last action\n\n{obs['last_action_error']}"
+                })
+        
+        user_msgs.append({
+            "type": "text",
+            "text": """# Next action
 
-{obs["last_action_error"]}
-
-""",
-                    }
-                )
-
-        # ask for the next action
-        user_msgs.append(
-            {
-                "type": "text",
-                "text": f"""\
-# Next action
-
-You will now think step by step and produce your next best action. Reflect on your past actions, any resulting error message, the current state of the page before deciding on your next action.
-""",
-            }
-        )
-
+You will now think step by step and produce your next best action. Reflect on your past actions, any resulting error message, the current state of the page before deciding on your next action."""
+        })
+        
+        return user_msgs
+    
+    def _query_model(self, system_msgs: list[dict], user_msgs: list[dict]) -> str:
+        """Query OpenAI model with messages."""
+        if self.system_message_handling == "combined":
+            combined_content = ""
+            if system_msgs:
+                combined_content += system_msgs[0]["text"] + "\n\n"
+            for msg in user_msgs:
+                if msg["type"] == "text":
+                    combined_content += msg["text"] + "\n"
+            
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[{"role": "user", "content": combined_content}],
+            )
+        else:
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": system_msgs},
+                    {"role": "user", "content": user_msgs},
+                ],
+            )
+        return response.choices[0].message.content
+    
+    def get_action(self, obs: dict) -> tuple[str, dict]:
+        system_msgs = self._build_system_messages()
+        user_msgs = self._build_user_messages(obs)
+        
         prompt_text_strings = []
         for message in system_msgs + user_msgs:
             match message["type"]:
@@ -317,50 +221,36 @@ You will now think step by step and produce your next best action. Reflect on yo
                     if isinstance(message["image_url"], dict):
                         image_url = image_url["url"]
                     if image_url.startswith("data:image"):
-                        prompt_text_strings.append(
-                            "image_url: " + image_url[:30] + "... (truncated)"
-                        )
+                        prompt_text_strings.append("image_url: " + image_url[:30] + "... (truncated)")
                     else:
                         prompt_text_strings.append("image_url: " + image_url)
                 case _:
-                    raise ValueError(
-                        f"Unknown message type {repr(message['type'])} in the task goal."
-                    )
+                    raise ValueError(f"Unknown message type {repr(message['type'])} in the task goal.")
+        
         full_prompt_txt = "\n".join(prompt_text_strings)
         logger.info(full_prompt_txt)
-
-        # query model using the abstraction function
-        action = self.query_model(system_msgs, user_msgs)
-
+        
+        action = self._query_model(system_msgs, user_msgs)
         self.action_history.append(action)
-
+        
         return action, {}
 
 
 @dataclasses.dataclass
 class DemoAgentArgs(AbstractAgentArgs):
-    """
-    Arguments for the DemoAgent.
-    
-    By isolating them in a dataclass, this ensures serialization without storing
-    internal states of the agent.
-    
-    This implementation uses the agisdk module for creating agents and passing parameters.
-    By default, it uses OpenAI's GPT-4o model, but can be configured for other models.
-    """
+    """Arguments for the DemoAgent."""
 
-    agent_name: str = "DemoAgent"  # Agent name for the SDK to recognize
-    model_name: str = "gpt-4o"     # Default model, can be changed at runtime
-    chat_mode: bool = False        # Whether to enable chat mode
-    demo_mode: str = "off"         # Visual effects mode (off, minimal, full)
-    use_html: bool = False         # Whether to include HTML in observations
-    use_axtree: bool = True        # Whether to include accessibility tree
-    use_screenshot: bool = False   # Whether to include screenshots
-    system_message_handling: Literal["separate", "combined"] = "separate"  # How to handle system messages
+    agent_name: str = "DemoAgent"
+    model_name: str = "gpt-4o"
+    chat_mode: bool = False
+    demo_mode: str = "off"
+    use_html: bool = False
+    use_axtree: bool = True
+    use_screenshot: bool = False
+    system_message_handling: Literal["separate", "combined"] = "separate"
 
     def make_agent(self):
         """Create and return an instance of DemoAgent with the configured parameters."""
-        # This method is called by the agisdk harness to instantiate the agent
         return DemoAgent(
             model_name=self.model_name,
             chat_mode=self.chat_mode,
@@ -372,25 +262,10 @@ class DemoAgentArgs(AbstractAgentArgs):
         )
 
 
-
-# Example creating and using the DemoAgent
 def run_demo_agent(model_name="gpt-4o", task_name="webclones.omnizon-1", headless=False, leaderboard=False, run_id=None):
-    """
-    Run a test with the DemoAgent on a browsergym task.
-    
-    Args:
-        model_name: The model to use with the agent (e.g., "deepseek/deepseek-r1:free")
-        task_name: The browsergym task to run
-        headless: Whether to run in headless mode (no browser UI)
-        leaderboard: Whether to submit results to leaderboard
-        run_id: Unique identifier for leaderboard submission
-    
-    Returns:
-        Results dictionary from the harness run
-    """
+    """Run a test with the DemoAgent on a browsergym task."""
     logger.info(f"Starting DemoAgent test with model: {model_name} on task: {task_name}")
     
-    # Create the agent arguments with the specified parameters
     agent_args = DemoAgentArgs(
         model_name=model_name,
         chat_mode=False,
@@ -401,23 +276,20 @@ def run_demo_agent(model_name="gpt-4o", task_name="webclones.omnizon-1", headles
         system_message_handling="separate"
     )
     
-    # Pass the agent arguments to the harness through the agisdk module
     harness = REAL.harness(
         agentargs=agent_args,
-        task_name=task_name,        # The specific task to run
-        headless=headless,          # Configurable browser visibility
-        max_steps=25,               # Maximum steps per task
-        use_axtree=agent_args.use_axtree,         # Pass through from agent args
-        use_screenshot=agent_args.use_screenshot,  # Pass through from agent args
-        leaderboard=leaderboard,    # Whether to submit to leaderboard
-        run_id=run_id,              # Run ID for leaderboard submission
+        task_name=task_name,
+        headless=headless,
+        max_steps=25,
+        use_axtree=agent_args.use_axtree,
+        use_screenshot=agent_args.use_screenshot,
+        leaderboard=leaderboard,
+        run_id=run_id,
     )
     
-    # Run the task
     logger.info("Running task...")
     results = harness.run()
     
-    # Print results summary
     logger.info("Task completed")
     logger.info(f"Results: {results}")
     
@@ -425,9 +297,6 @@ def run_demo_agent(model_name="gpt-4o", task_name="webclones.omnizon-1", headles
 
 
 if __name__ == "__main__":
-    import argparse
-    
-    # Set up command-line argument parsing
     parser = argparse.ArgumentParser(description="Run DemoAgent on browsergym tasks")
     parser.add_argument("--model", type=str, default="gpt-4o",
                         help="Model to use with the agent (default: gpt-4o)")
@@ -435,16 +304,13 @@ if __name__ == "__main__":
                         help="Task to run (default: webclones.omnizon-1)")
     parser.add_argument("--headless", type=str2bool, default=False,
                         help="Run headless (default: False)")
-    #Leaderboard arguments
     parser.add_argument("--run_id", type=str, default=None,
                         help="Run ID for leaderboard submission (required for leaderboard)")
     parser.add_argument("--leaderboard", type=str2bool, default=False,
                         help="Submit results to leaderboard (default: False)")
     
-    
     args = parser.parse_args()
     
-    # Run the agent with the specified parameters
     results = run_demo_agent(
         model_name=args.model, 
         task_name=args.task, 

@@ -8,6 +8,7 @@ import playwright.sync_api
 from agisdk.REAL.browsergym.core.task import AbstractBrowserTask
 from agisdk.REAL.browsergym.webclones.task_config import TaskConfig
 from agisdk.REAL.browsergym.webclones.evaluate import WebCloneEvaluator
+from agisdk.REAL.logging import logger as rich_logger
 
 logger = logging.getLogger(__name__)
 
@@ -90,40 +91,31 @@ class AbstractWebCloneTask(AbstractBrowserTask):
         elif run_id is not None:
             self.run_id = run_id
             logger.info(f"Using explicitly provided run_id: {self.run_id}")
-        elif api_key is not None and model_id_name is not None and run_name is not None:
-            # Try to get run_id from API
-            logger.info(f"Attempting to get run_id from API for model '{model_id_name}' and run '{run_name}'")
-            api_run_id = get_run_id_from_api(api_key, model_id_name, run_name)
-            if api_run_id:
-                self.run_id = api_run_id
-                # Also set the environment variable for other components
-                os.environ["RUNID"] = api_run_id
-                logger.info(f"Successfully obtained run_id from API: {self.run_id}")
-            else:
-                # Fall back to task config or default
-                if 'run_id' in self.task_config.task.config:
-                    self.run_id = self.task_config.task.config['run_id']
-                    logger.info(f"Using run_id from task config: {self.run_id}")
-                else:
-                    self.run_id = '0'
-                    logger.info(f"Using default run_id: {self.run_id}")
-        elif 'run_id' in self.task_config.task.config:
-            self.run_id = self.task_config.task.config['run_id']
-            logger.info(f"Using run_id from task config: {self.run_id}")
         else:
-            self.run_id = '0'
-            logger.info(f"Using default run_id: {self.run_id}")
+            if api_key is not None and model_id_name is not None and run_name is not None:
+                # Try to get run_id from API
+                logger.info(f"Attempting to get run_id from API for model '{model_id_name}' and run '{run_name}'")
+                api_run_id = get_run_id_from_api(api_key, model_id_name, run_name)
+                if api_run_id:
+                    self.run_id = api_run_id
+                    # Also set the environment variable for other components
+                    os.environ["RUNID"] = api_run_id
+                    logger.info(f"Successfully obtained run_id from API: {self.run_id}")
+                else:
+                    # Fall back to task config or default
+                    if 'run_id' in self.task_config.task.config:
+                        self.run_id = self.task_config.task.config['run_id']
+                        logger.info(f"Using run_id from task config: {self.run_id}")
+                    else:
+                        self.run_id = '0'
+                        logger.info(f"Using default run_id: {self.run_id}")
+            elif 'run_id' in self.task_config.task.config:
+                self.run_id = self.task_config.task.config['run_id']
+                logger.info(f"Using run_id from task config: {self.run_id}")
+            else:
+                self.run_id = '0'
+                logger.info(f"Using default run_id: {self.run_id}")
             
-        # Check if REAL_API_KEY environment variable is set and no run_id was found yet
-        if self.run_id == '0' and os.environ.get("REAL_API_KEY") and model_id_name is not None and run_name is not None:
-            env_api_key = os.environ.get("REAL_API_KEY")
-            logger.info(f"Attempting to get run_id from API using REAL_API_KEY for model '{model_id_name}' and run '{run_name}'")
-            api_run_id = get_run_id_from_api(env_api_key, model_id_name, run_name)
-            if api_run_id:
-                self.run_id = api_run_id
-                # Also set the environment variable for other components
-                os.environ["RUNID"] = api_run_id
-                logger.info(f"Successfully obtained run_id from API: {self.run_id}")
         self.evaluator = WebCloneEvaluator(task_config=self.task_config)
         self.goal = self.task_config.get_goal()
         self.url = self.task_config.get_start_url()
@@ -132,8 +124,8 @@ class AbstractWebCloneTask(AbstractBrowserTask):
                 self.url = os.environ["WEBCLONE_URL"]
             else:
                 raise ValueError("Provide a WebClones base URL or set it up as WEBCLONES_URL env var.")
-        print(f"Initialized {self.task_id} task.")
-        print(f"Goal: {self.goal}")
+        rich_logger.info(f"⚙️ Initialized {self.task_id} task.")
+        rich_logger.info(f"🎯 Goal: {self.goal}")
 
     def setup(self, page: playwright.sync_api.Page) -> tuple[str, dict]:
         self.page = page

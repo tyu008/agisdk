@@ -1,5 +1,6 @@
 from typing import Dict, Any
 from agisdk.REAL.browsergym.webclones.utils import generate_from_model
+from agisdk.REAL.logging import logger as rich_logger
 import jmespath
 import json
 
@@ -70,10 +71,10 @@ class WebCloneEvaluator:
 
     def evaluate(self, env_state: dict = None, model_response: str = None):
         results = []
-        # pretty print the state using json.dumps
-        print("Environment State:")
-        print(json.dumps(env_state, indent=4))
-        print("\n")
+        # Display environment state using Rich logging
+        rich_logger.info("🌍 Environment State:")
+        env_state_str = json.dumps(env_state, indent=4)
+        rich_logger.print(f"[dim]{env_state_str}[/dim]")
         for i, eval in enumerate(self.task_config.get_evals()):
             if eval.type == "llm_boolean":
                 is_correct = self.evaluate_with_llm(model_response, eval.rubric)
@@ -92,7 +93,11 @@ class WebCloneEvaluator:
                 
             else:
                 raise ValueError(f"Unknown evaluation type: {eval.type}")
-            print(f"Criterion {i} {eval.description}: [{eval_outcome}]")
+            # Display criterion evaluation using Rich logging
+            if is_correct[0]:
+                rich_logger.success(f"✅ Criterion {i} {eval.description}: [{eval_outcome}]")
+            else:
+                rich_logger.error(f"❌ Criterion {i} {eval.description}: [{eval_outcome}]")
 
 
         is_correct = all(result[0] for result in results)

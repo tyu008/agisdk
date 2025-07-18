@@ -3,6 +3,7 @@ import dataclasses
 import numpy as np
 import io
 import logging
+import time
 
 from PIL import Image
 from typing import Literal, Optional
@@ -11,6 +12,7 @@ from agisdk.REAL.browsergym.experiments import Agent, AbstractAgentArgs
 from agisdk.REAL.browsergym.core.action.highlevel import HighLevelActionSet
 from agisdk.REAL.browsergym.core.action.python import PythonActionSet
 from agisdk.REAL.browsergym.utils.obs import flatten_axtree_to_str, flatten_dom_to_str, prune_html
+from ..logging import logger as rich_logger
 
 logger = logging.getLogger(__name__)
 
@@ -47,19 +49,20 @@ class DemoAgent(Agent):
         
     def close(self):
         """Called when the agent is being closed"""
-        # Print a summary of the interaction
-        print(f"\n==== Agent Session Summary ====")
-        print(f"Total actions: {len(self.action_history)}")
-        
         # Evaluate success if available
         if hasattr(self, 'last_observation') and self.last_observation:
             success = self.last_observation.get('success', None)
+            reward = self.last_observation.get('reward', 0)
+            time_taken = None
+            if hasattr(self, 'session_start_time'):
+                time_taken = time.time() - self.session_start_time
+            
             if success is not None:
-                print(f"Success: {success}")
-                print(f"Reward: {self.last_observation.get('reward', 0)}")
-        
-        print(f"Session completed")
-        print(f"=============================\n")
+                rich_logger.task_complete(success, reward, time_taken)
+            else:
+                rich_logger.info(f"🎯 Session completed - {len(self.action_history)} actions taken")
+        else:
+            rich_logger.info(f"🎯 Session completed - {len(self.action_history)} actions taken")
         
         super().close()
         
@@ -353,10 +356,12 @@ class DemoAgent(Agent):
         # Print task start information if this is the first action
         if len(self.action_history) == 0:
             goal_str = str(obs.get("goal_object", ""))
-            print(f"\n==== Starting New Task ====")
-            print(f"Task: {goal_str}")
-            print(f"Model: {self.model_name}")
-            print(f"===========================\n")
+            # Extract just the text content if it's a message object
+            if isinstance(obs.get("goal_object"), list) and len(obs.get("goal_object")) > 0:
+                if isinstance(obs.get("goal_object")[0], dict) and "text" in obs.get("goal_object")[0]:
+                    goal_str = obs.get("goal_object")[0]["text"]
+            rich_logger.task_start(goal_str, self.model_name)
+            self.session_start_time = time.time()
             
         system_msgs = []
         user_msgs = []
@@ -521,7 +526,7 @@ class DemoAgent(Agent):
 
             if obs["last_action_error"]:
                 # Log error to console
-                print(f"Error: {str(obs['last_action_error'])[:100]}...")
+                rich_logger.error(f"Error: {str(obs['last_action_error'])[:100]}...")
                 
                 # Add error to message
                 user_msgs.append(
@@ -579,9 +584,12 @@ class DemoAgent(Agent):
         action_args = action.split("(", 1)[1].rstrip(")") if "(" in action else ""
 
         # Log concise action summary to console
-        goal_snippet = str(obs.get("goal_object", ""))[:30].replace("\n", " ")
         step_num = len(self.action_history) + 1
-        print(f"Task: {goal_snippet}... | Step {step_num} | Action: {action_type} {action_args[:30]}{'...' if len(action_args) > 30 else ''}")
+        action_summary = f"{action_type}"
+        if action_args:
+            action_summary += f"({action_args[:50]}{'...' if len(action_args) > 50 else ''})"
+        
+        rich_logger.task_step(step_num, action_summary)
 
         self.action_history.append(action)
         
@@ -593,32 +601,7 @@ class DemoAgent(Agent):
 
 @dataclasses.dataclass
 class DemoAgentArgs(AbstractAgentArgs):
-    """
-    This class stores the arguments that define the DemoAgent configuration.
-
-    By isolating parameters in a dataclass, this ensures serialization without storing
-    internal states of the agent.
-    
-    The model_name parameter can be:
-    - An OpenAI model starting with "gpt-" (e.g., "gpt-4o", "gpt-4o-mini")
-    - An Anthropic model:
-      - "claude-3-opus", "claude-3-sonnet", "claude-3-haiku"
-      - "claude-3.5-sonnet"
-      - "claude-opus-4", "claude-sonnet-4"
-      - "sonnet-3.7" (alias for Claude 3.7 Sonnet)
-      - Add ":thinking" suffix to enable extended thinking (e.g., "claude-opus-4:thinking")
-    - An OpenRouter model with the prefix "openrouter/" (e.g., "openrouter/anthropic/claude-3-5-sonnet")
-    - A local model with the prefix "local/" (e.g., "local/llama-2-7b")
-    
-    API keys can be provided directly as parameters or through environment variables:
-    - OpenAI models: provide openai_api_key or set OPENAI_API_KEY env var
-    - Anthropic models: provide anthropic_api_key or set ANTHROPIC_API_KEY env var
-    - OpenRouter models: provide openrouter_api_key or set OPENROUTER_API_KEY env var
-      Optional: provide openrouter_site_url/openrouter_site_name or set the corresponding env vars
-    
-    The thinking_budget parameter controls the token budget for Anthropic's extended thinking feature.
-    Only applies when using ":thinking" suffix with supported Claude models.
-    """
+   
 
     model_name: str = "gpt-4o"
     chat_mode: bool = False
