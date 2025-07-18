@@ -74,7 +74,11 @@ class PlaywrightComputer:
             "TAB": "Tab",
             "SPACE": "Space",
             "BACKSPACE": "Backspace",
-            "DELETE": "Delete"
+            "DELETE": "Delete",
+            "CTRL": "Control",
+            "ALT": "Alt",
+            "SHIFT": "Shift",
+            "META": "Meta"
         }
         
         mapped_keys = [key_mapping.get(key, key) for key in keys]
@@ -169,17 +173,22 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
                     prev_id = None
                 else:
                     # send screenshot as computer_call_output
-                    input_payload = [
-                        {
-                            "call_id": last_call_id,
-                            "type": "computer_call_output",
-                            "output": {
-                                "type": "input_image",
-                                "image_url": f"data:image/png;base64,{comp.screenshot_b64()}",
-                            },
-                            **({"acknowledged_safety_checks": pending_safety} if pending_safety else {}),
-                        }
-                    ]
+                    try:
+                        screenshot_b64 = comp.screenshot_b64()
+                        input_payload = [
+                            {
+                                "call_id": last_call_id,
+                                "type": "computer_call_output",
+                                "output": {
+                                    "type": "input_image",
+                                    "image_url": f"data:image/png;base64,{screenshot_b64}",
+                                },
+                                **({"acknowledged_safety_checks": pending_safety} if pending_safety else {}),
+                            }
+                        ]
+                    except PlaywrightError as pe:
+                        rich_logger.error(f"Failed to take screenshot: {pe}")
+                        raise RuntimeError("Browser context closed during screenshot") from pe
                     prev_id = resp.id  # defined below
 
                 try:
@@ -219,9 +228,17 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
                             action_summary += f"({act.x}, {act.y})"
                         elif act.type == "drag":
                             if hasattr(act, 'path') and act.path:
-                                start_point = act.path[0]
-                                end_point = act.path[-1]
-                                action_summary += f"({start_point['x']}, {start_point['y']}) -> ({end_point['x']}, {end_point['y']})"
+                                try:
+                                    # Try to access path as list first
+                                    if hasattr(act.path, '__getitem__'):
+                                        start_point = act.path[0]
+                                        end_point = act.path[-1]
+                                        action_summary += f"({start_point['x']}, {start_point['y']}) -> ({end_point['x']}, {end_point['y']})"
+                                    else:
+                                        # Handle ActionDragPath object
+                                        action_summary += f"(drag path)"
+                                except (TypeError, IndexError, KeyError):
+                                    action_summary += "(drag - invalid path)"
                             else:
                                 action_summary += "(drag - no path)"
                         
@@ -236,8 +253,8 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
                                 comp.double_click(act.x, act.y, getattr(act, "button", "left"))
                             elif act.type == "scroll":
                                 # Handle different scroll parameter formats
-                                start_x = getattr(act, 'start_x', getattr(act, 'x', WIDTH // 2))
-                                start_y = getattr(act, 'start_y', getattr(act, 'y', HEIGHT // 2))
+                                start_x = getattr(act, 'start_x', getattr(act, 'x', WIDTH // 2) if hasattr(act, 'x') else WIDTH // 2)
+                                start_y = getattr(act, 'start_y', getattr(act, 'y', HEIGHT // 2) if hasattr(act, 'y') else HEIGHT // 2)
                                 dx = getattr(act, 'dx', getattr(act, 'delta_x', 0))
                                 dy = getattr(act, 'dy', getattr(act, 'delta_y', 0))
                                 comp.scroll(start_x, start_y, dx, dy)
@@ -249,10 +266,23 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
                                 comp.move(act.x, act.y)
                             elif act.type == "drag":
                                 if hasattr(act, 'path') and act.path:
-                                    start_point = act.path[0]
-                                    end_point = act.path[-1]
-                                    button = getattr(act, 'button', 'left')
-                                    comp.drag(start_point['x'], start_point['y'], end_point['x'], end_point['y'], button)
+                                    try:
+                                        # Try to access path as list first
+                                        if hasattr(act.path, '__getitem__'):
+                                            start_point = act.path[0]
+                                            end_point = act.path[-1]
+                                            button = getattr(act, 'button', 'left')
+                                            comp.drag(start_point['x'], start_point['y'], end_point['x'], end_point['y'], button)
+                                        else:
+                                            # Handle ActionDragPath object - check for start_x, start_y, end_x, end_y attributes
+                                            start_x = getattr(act.path, 'start_x', getattr(act, 'start_x', 0))
+                                            start_y = getattr(act.path, 'start_y', getattr(act, 'start_y', 0))
+                                            end_x = getattr(act.path, 'end_x', getattr(act, 'end_x', 0))
+                                            end_y = getattr(act.path, 'end_y', getattr(act, 'end_y', 0))
+                                            button = getattr(act, 'button', 'left')
+                                            comp.drag(start_x, start_y, end_x, end_y, button)
+                                    except (TypeError, IndexError, KeyError, AttributeError) as e:
+                                        rich_logger.warning(f"Drag action failed: {e}")
                                 else:
                                     rich_logger.warning("Drag action missing path data")
                             elif act.type == "wait":
@@ -389,7 +419,10 @@ def main() -> None:
     run_dir = create_results_directory()
     rich_logger.info(f"📁 Results directory: {run_dir}")
 
-    selected = [t for t in tasks if t["id"] == args.filter]
+    if args.filter == "all":
+        selected = tasks
+    else:
+        selected = [t for t in tasks if t["id"] == args.filter]
     rich_logger.info(f"🚀 Running {len(selected)} task(s) with {args.workers} worker(s)")
 
     results: List[Dict[str, Any]] = []
