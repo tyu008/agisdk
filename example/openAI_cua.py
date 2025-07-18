@@ -5,6 +5,7 @@ import base64
 import json
 import os
 import time
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import suppress
 from datetime import datetime, timezone
@@ -308,11 +309,23 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
                 raise TimeoutError("iteration limit reached without final answer")
 
             # ------------------ evaluate
+            # Navigate to /finish endpoint to get final state JSON
+            finish_url = f"{base}/finish"
             env_state = {}
-            with suppress(PlaywrightError, json.JSONDecodeError):
-                pre = comp.page.query_selector("pre")
-                if pre:
-                    env_state = json.loads(pre.inner_text())
+            try:
+                rich_logger.info(f"🌐 Navigating to {finish_url} to extract final state...")
+                comp.goto(finish_url)
+                comp.wait(2000)  # Wait for page to load
+                with suppress(PlaywrightError, json.JSONDecodeError):
+                    pre = comp.page.query_selector("pre")
+                    if pre:
+                        env_state = json.loads(pre.inner_text())
+                        rich_logger.info(f"✅ Successfully extracted env_state from /finish endpoint")
+                    else:
+                        rich_logger.warning(f"❌ No <pre> element found at /finish endpoint")
+            except Exception as e:
+                rich_logger.error(f"❌ Failed to navigate to /finish endpoint: {e}")
+                env_state = {}
 
             ev = WebCloneEvaluator(TaskConfig(tid))
             reward, done, msg, _ = ev.evaluate(env_state=env_state, model_response=model_ans)
@@ -324,23 +337,11 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
             res["ok"] = True
             res["reward"] = reward
             res["eval_message"] = msg
+            res["env_state"] = env_state  # Store env_state for individual task saving
             
             # Log task completion
             elapsed = time.time() - wall0
             rich_logger.task_complete(success, reward, elapsed, tid)
-            
-            # Save final state to base_url/final
-            final_url = f"{base}/final"
-            final_state = {
-                "task_id": tid,
-                "env_state": env_state,
-                "model_response": model_ans,
-                "success": success,
-                "reward": reward,
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
-            comp.goto(final_url)
-            comp.page.evaluate(f"window.finalState = {json.dumps(final_state)}")
 
     except Exception as exc:
         res["error"] = str(exc)
@@ -400,6 +401,40 @@ def save_results_to_file(results: List[Dict[str, Any]], run_dir: Path, run_name:
     summary_only = {k: v for k, v in summary.items() if k != "tasks"}
     with open(summary_file, 'w') as f:
         json.dump(summary_only, f, indent=2)
+    
+    # Save individual task files
+    tasks_dir = run_dir / "tasks"
+    tasks_dir.mkdir(exist_ok=True)
+    
+    for task_result in results:
+        task_id = task_result.get("task_id", "unknown")
+        task_file = tasks_dir / f"task_{task_id}.json"
+        
+        # Create individual task result with additional metadata
+        individual_task = {
+            "task_id": task_id,
+            "run_name": run_name,
+            "timestamp": task_result.get("start_time", datetime.now(timezone.utc).isoformat()),
+            "model": "OpenAI-CUA",
+            "success": task_result.get("success", False),
+            "reward": task_result.get("reward", 0),
+            "elapsed_time": task_result.get("elapsed_time", 0),
+            "iterations": task_result.get("iterations", 0),
+            "actions_taken": task_result.get("actions_taken", []),
+            "env_state": task_result.get("env_state", {}),
+            "model_response": task_result.get("response", ""),
+            "eval_message": task_result.get("eval_message", ""),
+            "error": task_result.get("error"),
+            "start_time": task_result.get("start_time"),
+            "end_time": task_result.get("end_time"),
+        }
+        
+        with open(task_file, 'w') as f:
+            json.dump(individual_task, f, indent=2)
+        
+        rich_logger.info(f"📄 Task {task_id} saved to: {task_file}")
+    
+    rich_logger.info(f"📁 Individual task files saved to: {tasks_dir}")
 
 def main() -> None:
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
@@ -408,7 +443,7 @@ def main() -> None:
     argp = argparse.ArgumentParser("Computer-Use runner")
     argp.add_argument("--filter", default="omnizon-1", help="task id to run")
     argp.add_argument("--workers", type=int, default=1)
-    argp.add_argument("--no-headless", action="store_false")
+    argp.add_argument("--no-headless", action="store_true")
     argp.add_argument("--api-key", default=os.getenv("REALEVALS_API_KEY", ""))
     argp.add_argument("--run-name", default=default_name)
     argp.add_argument("--run-id", default="aba700cf-447a-4dc7-84eb-c50ca5df78b8")

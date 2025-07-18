@@ -17,9 +17,10 @@ from pathlib import Path
 from scrapybara import Scrapybara
 from scrapybara.anthropic import Anthropic
 from scrapybara.tools import ComputerTool
-from scrapybara.prompts import BROWSER_SYSTEM_PROMPT       
+from scrapybara.prompts import BROWSER_SYSTEM_PROMPT        # 🟢 browser-specific
+# ApiError import removed - not available in current version
 
-from agisdk.REAL.tasks import all_tasks as tasks          
+from agisdk.REAL.tasks import all_tasks as tasks            # ✅ REAL task list
 from agisdk.REAL.browsergym.webclones.task_config import TaskConfig
 from agisdk.REAL.browsergym.webclones.evaluate     import WebCloneEvaluator
 
@@ -69,20 +70,29 @@ def run_task(task: dict, run_id: str, model: Anthropic,
         inst   = client.start_browser()
         print(f"✅ [{tid}] Browser started successfully")
 
-        # Navigate to config page and let Claude complete the task
+        # 2️⃣ Navigate to config page and let Claude complete the task
+        print(f"🤖 [{tid}] Sending task to Claude...")
+        print(f"    Prompt: First navigate to {cfg} to configure the task, then complete this goal: {goal}")
+        
         resp = client.act(
             model  = model,
             tools  = [ComputerTool(inst)],
             system = BROWSER_SYSTEM_PROMPT,
             prompt = f"First navigate to {cfg} to configure the task, then complete this goal: {goal}. After completing the task, navigate to {base}/finish and extract the JSON from the <pre> element on that page.",
         )
+        
+        print(f"💬 [{tid}] Claude response: {resp.text[:200]}{'...' if len(resp.text) > 200 else ''}")
 
+        # 3️⃣ grab env JSON from <pre> - let Claude handle this
+        print(f"📊 [{tid}] Extracting final results...")
         finish_resp = client.act(
             model  = model,
             tools  = [ComputerTool(inst)],
             system = BROWSER_SYSTEM_PROMPT,
             prompt = f"Navigate to {base}/finish and extract the JSON text from the <pre> element on the page. Return only the JSON content.",
         )
+        
+        print(f"📋 [{tid}] Finish response: {finish_resp.text[:200]}{'...' if len(finish_resp.text) > 200 else ''}")
         
         # Try to extract JSON from the response
         try:
@@ -99,22 +109,37 @@ def run_task(task: dict, run_id: str, model: Anthropic,
         print(f"\n=== ENV STATE for {tid} ===")
         print(json.dumps(env_state, indent=2))
 
-        # 5️⃣ evaluate
+        # 4️⃣ evaluate
+        print(f"🏆 [{tid}] Evaluating task performance...")
         evaluator = WebCloneEvaluator(TaskConfig(tid))
         reward, done, msg, _ = evaluator.evaluate(
             env_state=env_state,
             model_response=resp.text or "")
         result.update(ok=True, reward=reward, message=msg)
-        print(f"=== EVAL RESULT for {tid} → {msg} (reward {reward}) ===")
+        
+        # Success summary
+        elapsed = time.time() - t0
+        print(f"✅ [{tid}] TASK COMPLETED!")
+        print(f"   Reward: {reward}")
+        print(f"   Status: {msg}")
+        print(f"   Duration: {elapsed:.2f}s")
+        print(f"   Completed at: {datetime.now().strftime('%H:%M:%S')}")
 
     except Exception as e:
+        elapsed = time.time() - t0
         result["error"] = str(e)
-        print(f"❌ {tid}: {e}")
+        print(f"❌ [{tid}] TASK FAILED!")
+        print(f"   Error: {e}")
+        print(f"   Duration: {elapsed:.2f}s")
+        print(f"   Failed at: {datetime.now().strftime('%H:%M:%S')}")
 
     finally:
         result["elapsed"] = time.time() - t0
+        result["finished_at"] = datetime.now().isoformat()
         if inst:
+            print(f"🔄 [{tid}] Stopping browser instance...")
             inst.stop()
+        print(f"=" * 60)
 
     return result
 
@@ -136,7 +161,7 @@ def main() -> None:
 
     model = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))  # brings own key
 
-    run_id = ""
+    run_id = "ce41693c-babe-4192-a932-d45e45804308"
 
     selected = [t for t in tasks if t["id"].startswith(args.filter)]
     print(f"{len(selected)} task(s) → {args.workers} worker(s)   run_id={run_id}")
