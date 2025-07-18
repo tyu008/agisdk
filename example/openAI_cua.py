@@ -5,7 +5,6 @@ import base64
 import json
 import os
 import time
-import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import suppress
 from datetime import datetime, timezone
@@ -49,7 +48,7 @@ class PlaywrightComputer:
 
     def double_click(self, x: float, y: float, button: str = "left"):
         x, y = self._clamp(x, y)
-        self.page.dblclick(x, y, button=button)
+        self.page.mouse.dblclick(x, y, button=button)
 
     def scroll(self, start_x: float, start_y: float, dx: float, dy: float):
         start_x, start_y = self._clamp(start_x, start_y)
@@ -67,11 +66,16 @@ class PlaywrightComputer:
             "PAGE_UP": "PageUp",
             "PAGE_DOWN": "PageDown",
             "ARROW_UP": "ArrowUp",
+            "ARROWUP": "ArrowUp",
             "ARROW_DOWN": "ArrowDown",
+            "ARROWDOWN": "ArrowDown",
             "ARROW_LEFT": "ArrowLeft",
+            "ARROWLEFT": "ArrowLeft",
             "ARROW_RIGHT": "ArrowRight",
+            "ARROWRIGHT": "ArrowRight",
             "ENTER": "Enter",
             "ESCAPE": "Escape",
+            "ESC": "Escape",
             "TAB": "Tab",
             "SPACE": "Space",
             "BACKSPACE": "Backspace",
@@ -158,7 +162,7 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
             comp.goto(cfg_url)
             comp.goto(base)
 
-            pending_safety: List[str] = []
+            pending_safety: List[Dict[str, str]] = []
             last_call_id: Optional[str] = None
 
             # ------------------ loop
@@ -297,7 +301,7 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
                             rich_logger.error(f"Playwright error: {pe}")
                             continue
 
-                        pending_safety = [sc.id for sc in call.pending_safety_checks]
+                        pending_safety = [{"id": sc.id} for sc in call.pending_safety_checks]
                     continue  # next iteration
 
                 # No computer_call → look for text answer
@@ -466,7 +470,10 @@ def main() -> None:
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futs = [pool.submit(run_task, t, run_id, not args.no_headless) for t in selected]
         for f in as_completed(futs):
-            results.append(f.result())
+            result = f.result()
+            results.append(result)
+            # Save results after each task completion
+            save_results_to_file(results, run_dir, args.run_name)
 
     # Calculate and display summary
     successful = [r for r in results if r.get("success", False)]
