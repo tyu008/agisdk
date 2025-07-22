@@ -1,45 +1,28 @@
 #!/usr/bin/env python
-"""
-runner.py  – Benchmark Anthropic computer-use agents on REAL web-clone tasks.
-
-Requirements
-------------
-pip install "scrapybara[anthropic]" agisdk requests
-export SCRAPYBARA_API_KEY=<your_key>
-export ANTHROPIC_API_KEY=<your_key>   # or omit → credits billed in agent-steps
-"""
 from __future__ import annotations
 import os, json, time, argparse, urllib.parse, logging
-from datetime import datetime
+from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from typing import Dict, Any, List
 
 from scrapybara import Scrapybara
 from scrapybara.anthropic import Anthropic
 from scrapybara.tools import ComputerTool
-from scrapybara.prompts import BROWSER_SYSTEM_PROMPT        # 🟢 browser-specific
-# ApiError import removed - not available in current version
+from scrapybara.prompts import BROWSER_SYSTEM_PROMPT
 
-from agisdk.REAL.tasks import all_tasks as tasks            # ✅ REAL task list
+from agisdk.REAL.tasks import all_tasks as tasks
 from agisdk.REAL.browsergym.webclones.task_config import TaskConfig
 from agisdk.REAL.browsergym.webclones.evaluate     import WebCloneEvaluator
 
-
-
-
-# ───────────────────────────── core per-task worker ────────────────────────
 def run_task(task: dict, run_id: str, model: Anthropic, 
-             timeout_ms: int = 20000) -> dict:
-    """
-    Execute a single REAL task with Claude+Scrapybara and return result dict.
-    """
+             timeout_ms: int = 420000) -> dict:
     t0 = time.time()
     tid   = task["id"]
     base  = task["website"]["url"]
     goal  = task["goal"]
     cfg   = f"{base}/config?run_id={run_id}&task_id={tid}&removePopup=true"
 
-    # Print detailed task information
     print(f"\n🚀 STARTING TASK: {tid}")
     print(f"   Website: {base}")
     print(f"   Goal: {goal}")
@@ -64,66 +47,71 @@ def run_task(task: dict, run_id: str, model: Anthropic,
 
     inst = None
     try:
-        # 1️⃣ spin up browser
         print(f"🌐 [{tid}] Starting browser instance...")
         client = Scrapybara()
         inst   = client.start_browser()
         print(f"✅ [{tid}] Browser started successfully")
 
-        # 2️⃣ Navigate to config page and let Claude complete the task
         print(f"🤖 [{tid}] Sending task to Claude...")
         print(f"    Prompt: First navigate to {cfg} to configure the task, then complete this goal: {goal}")
         
+        task_timeout = 420  # 7 minutes in seconds
+        start_time = time.time()
         resp = client.act(
             model  = model,
             tools  = [ComputerTool(inst)],
             system = BROWSER_SYSTEM_PROMPT,
-            prompt = f"First navigate to {cfg} to configure the task, then complete this goal: {goal}. After completing the task, navigate to {base}/finish and extract the JSON from the <pre> element on that page.",
+            prompt = f"First navigate to {cfg} to configure the task, then complete this goal: {goal}. When the task is complete, immediately navigate to {base}/finish and extract the JSON from the <pre> element on that page. Return only the JSON content from the finish page.",
         )
+        if time.time() - start_time > task_timeout:
+            raise TimeoutError(f"Task {tid} exceeded 7-minute timeout")
         
         print(f"💬 [{tid}] Claude response: {resp.text[:200]}{'...' if len(resp.text) > 200 else ''}")
 
-        # 3️⃣ grab env JSON from <pre> - let Claude handle this
-        print(f"📊 [{tid}] Extracting final results...")
-        finish_resp = client.act(
-            model  = model,
-            tools  = [ComputerTool(inst)],
-            system = BROWSER_SYSTEM_PROMPT,
-            prompt = f"Navigate to {base}/finish and extract the JSON text from the <pre> element on the page. Return only the JSON content.",
-        )
+        print(f"📊 [{tid}] Parsing final results from response...")
         
-        print(f"📋 [{tid}] Finish response: {finish_resp.text[:200]}{'...' if len(finish_resp.text) > 200 else ''}")
-        
-        # Try to extract JSON from the response
+        env_state = None
         try:
-            env_state = json.loads(finish_resp.text)
+            env_state = json.loads(resp.text)
         except (json.JSONDecodeError, TypeError):
-            # If direct parsing fails, try to extract from response text
             import re
-            json_match = re.search(r'\{.*\}', finish_resp.text, re.DOTALL)
+            json_match = re.search(r'\{.*\}', resp.text, re.DOTALL)
             if json_match:
-                env_state = json.loads(json_match.group())
-            else:
-                env_state = {"error": "Could not extract JSON", "response": finish_resp.text}
-        result["env_state"] = env_state             # store for logs
+                try:
+                    env_state = json.loads(json_match.group())
+                except json.JSONDecodeError:
+                    pass
+        if env_state is None:
+            env_state = {"error": "Could not extract JSON from response", "response": resp.text}
+        
+        result["env_state"] = env_state
         print(f"\n=== ENV STATE for {tid} ===")
         print(json.dumps(env_state, indent=2))
+        
+        result["response"] = resp.text
 
-        # 4️⃣ evaluate
         print(f"🏆 [{tid}] Evaluating task performance...")
         evaluator = WebCloneEvaluator(TaskConfig(tid))
-        reward, done, msg, _ = evaluator.evaluate(
+        reward, _, msg, _ = evaluator.evaluate(
             env_state=env_state,
             model_response=resp.text or "")
         result.update(ok=True, reward=reward, message=msg)
         
-        # Success summary
+        success = reward > 0
+        result["success"] = success
+        
         elapsed = time.time() - t0
         print(f"✅ [{tid}] TASK COMPLETED!")
         print(f"   Reward: {reward}")
+        print(f"   Success: {success}")
         print(f"   Status: {msg}")
         print(f"   Duration: {elapsed:.2f}s")
         print(f"   Completed at: {datetime.now().strftime('%H:%M:%S')}")
+        
+        if inst:
+            print(f"🔄 [{tid}] Closing browser after successful completion...")
+            inst.stop()
+            inst = None
 
     except Exception as e:
         elapsed = time.time() - t0
@@ -135,7 +123,10 @@ def run_task(task: dict, run_id: str, model: Anthropic,
 
     finally:
         result["elapsed"] = time.time() - t0
+        result["elapsed_time"] = result["elapsed"]
         result["finished_at"] = datetime.now().isoformat()
+        result["start_time"] = result["started_at"]
+        result["end_time"] = result["finished_at"]
         if inst:
             print(f"🔄 [{tid}] Stopping browser instance...")
             inst.stop()
@@ -143,40 +134,161 @@ def run_task(task: dict, run_id: str, model: Anthropic,
 
     return result
 
-# ───────────────────────────── CLI entrypoint ──────────────────────────────
+
+def get_results_folder() -> Path:
+    return Path("anthropic_cua_results")
+
+def load_existing_results() -> Dict[str, Any]:
+    results_folder = get_results_folder()
+    existing_tasks = {}
+    
+    if results_folder.exists():
+        for task_file in results_folder.glob("task_*.json"):
+            try:
+                with open(task_file, 'r') as f:
+                    task_data = json.load(f)
+                    task_id = task_data.get("task_id")
+                    if task_id:
+                        existing_tasks[task_id] = task_data
+            except (json.JSONDecodeError, IOError) as e:
+                print(f"⚠️ Could not load task file {task_file}: {e}")
+    
+    return {"tasks": existing_tasks}
+
+def save_task_result(task_result: Dict[str, Any], run_name: str) -> None:
+    results_folder = get_results_folder()
+    results_folder.mkdir(exist_ok=True)
+    
+    task_id = task_result.get("task_id", "unknown")
+    task_file = results_folder / f"task_{task_id}.json"
+    
+    individual_task = {
+        "task_id": task_id,
+        "run_name": run_name,
+        "timestamp": task_result.get("start_time", datetime.now(timezone.utc).isoformat()),
+        "model": "Anthropic-CUA",
+        "success": task_result.get("success", False),
+        "reward": task_result.get("reward", 0),
+        "elapsed_time": task_result.get("elapsed_time", 0),
+        "env_state": task_result.get("env_state", {}),
+        "model_response": task_result.get("response", ""),
+        "eval_message": task_result.get("message", ""),
+        "error": task_result.get("error"),
+        "start_time": task_result.get("start_time"),
+        "end_time": task_result.get("end_time"),
+        "website": task_result.get("website", ""),
+        "goal": task_result.get("goal", ""),
+    }
+    
+    with open(task_file, 'w') as f:
+        json.dump(individual_task, f, indent=2)
+    
+    print(f"📄 Task {task_id} saved to: {task_file}")
+
+def save_summary_results(all_results: Dict[str, Any], run_name: str) -> None:
+    results_folder = get_results_folder()
+    results_folder.mkdir(exist_ok=True)
+    
+    tasks = all_results.get("tasks", {})
+    completed_tasks = [t for t in tasks.values() if t.get("success") is not None]
+    successful_tasks = [t for t in completed_tasks if t.get("success", False)]
+    
+    summary = {
+        "run_name": run_name,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "model": "Anthropic-CUA",
+        "total_tasks": len(completed_tasks),
+        "successful_tasks": len(successful_tasks),
+        "failed_tasks": len(completed_tasks) - len(successful_tasks),
+        "success_rate": len(successful_tasks) / len(completed_tasks) * 100 if completed_tasks else 0,
+        "avg_time": sum(t["elapsed_time"] for t in completed_tasks) / len(completed_tasks) if completed_tasks else 0,
+        "total_time": sum(t["elapsed_time"] for t in completed_tasks),
+    }
+    
+    summary_file = results_folder / "summary.json"
+    with open(summary_file, 'w') as f:
+        json.dump(summary, f, indent=2)
+    
+    print(f"📊 Summary saved to: {summary_file}")
+
+def is_task_completed(task_id: str, existing_results: Dict[str, Any]) -> bool:
+    tasks = existing_results.get("tasks", {})
+    task_result = tasks.get(task_id)
+    return task_result is not None and task_result.get("success", False)
+
 def main() -> None:
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    default_name = f"Anthropic_CUA_{ts}"
 
     p = argparse.ArgumentParser("Scrapybara-Claude REAL benchmark")
     p.add_argument("--filter",   default="omnizon-1",
-                   help="Task id (or prefix) to run, e.g. `omnizon` for all matching")
-    p.add_argument("--workers",  type=int, default=1,
+                   help="Task id (or prefix) to run, e.g. `omnizon` for all matching, or `all` for all tasks")
+    p.add_argument("--workers",  type=int, default=10,
                    help="Thread pool size (one browser per worker)")
     p.add_argument("--no-headless", action="store_false", dest="headless",
                    help="Disable headless mode for debugging")
     p.add_argument("--eval-api-key", default="",
                    help="REAL-Evals API key (optional)")
-    p.add_argument("--run-name", default=f"Claude_run_{ts}")
+    p.add_argument("--run-name", default=default_name)
+    p.add_argument("--run-id", default="ce41693c-babe-4192-a932-d45e45804308")
     args = p.parse_args()
 
-    model = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))  # brings own key
+    model = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-    run_id = "ce41693c-babe-4192-a932-d45e45804308"
+    run_id = args.run_id
+    
+    existing_results = load_existing_results()
+    print(f"📁 Results folder: {get_results_folder()}")
+    
+    completed_count = sum(1 for task in existing_results.get("tasks", {}).values() if task.get("success", False))
+    if completed_count > 0:
+        print(f"✅ Found {completed_count} previously completed tasks that will be skipped")
 
-    selected = [t for t in tasks if t["id"].startswith(args.filter)]
-    print(f"{len(selected)} task(s) → {args.workers} worker(s)   run_id={run_id}")
+    if args.filter == "all":
+        selected = tasks
+        print(f"🌟 Running ALL {len(selected)} tasks with {args.workers} worker(s)")
+        print(f"   This will take a significant amount of time (7 minutes per task)")
+        print(f"   Estimated total time: {len(selected) * 7 / args.workers:.1f} minutes")
+    else:
+        selected = [t for t in tasks if t["id"].startswith(args.filter)]
+        print(f"🚀 Running {len(selected)} task(s) with {args.workers} worker(s)")
+    
+    tasks_to_run = [t for t in selected if not is_task_completed(t["id"], existing_results)]
+    skipped_count = len(selected) - len(tasks_to_run)
+    
+    if skipped_count > 0:
+        print(f"⏭️  Skipping {skipped_count} already completed tasks")
+    
+    print(f"🎯 Running {len(tasks_to_run)} remaining task(s)")
+    print(f"   Each task has a 7-minute timeout")
 
-    results = []
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futs = [pool.submit(run_task, t, run_id, model)
-                for t in selected]
+                for t in tasks_to_run]
         for f in as_completed(futs):
-            results.append(f.result())
+            result = f.result()
+            existing_results["tasks"][result["task_id"]] = result
+            save_task_result(result, args.run_name)
 
-    # summary
-    successes = [r for r in results if r["ok"]]
-    avg = (sum(r["elapsed"] for r in results) / len(results)) if results else 0
-    print(f"\n✓ {len(successes)}/{len(results)} succeeded   avg time {avg:.2f}s")
+    all_tasks = existing_results.get("tasks", {})
+    completed_tasks = [t for t in all_tasks.values() if t.get("success") is not None]
+    successful = [t for t in completed_tasks if t.get("success", False)]
+    failed = [t for t in completed_tasks if not t.get("success", False)]
+    success_rate = len(successful) / len(completed_tasks) * 100 if completed_tasks else 0
+    avg_time = sum(t["elapsed_time"] for t in completed_tasks) / len(completed_tasks) if completed_tasks else 0
+    
+    print("🎉 BENCHMARK RESULTS")
+    print(f"Tasks completed successfully: {len(successful)}/{len(completed_tasks)}")
+    print(f"Success rate: {success_rate:.2f}%")
+    print(f"Average time: {avg_time:.2f} seconds")
+    print(f"Total time: {sum(t['elapsed_time'] for t in completed_tasks):.2f} seconds")
+    
+    if failed:
+        print(f"Failed tasks: {len(failed)}")
+        for task in failed:
+            print(f"  - {task['task_id']}: {task.get('error', 'Unknown error')}")
+    
+    save_summary_results(existing_results, args.run_name)
 
 
 if __name__ == "__main__":

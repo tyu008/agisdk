@@ -11,20 +11,18 @@ from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 
-import requests  # pip install requests
+import requests
 from openai import OpenAI, OpenAIError
 from playwright.sync_api import sync_playwright, Error as PlaywrightError
 
-from agisdk.REAL.tasks import all_tasks as tasks  # noqa – provided by agisdk
+from agisdk.REAL.tasks import all_tasks as tasks
 from agisdk.REAL.browsergym.webclones.evaluate import WebCloneEvaluator
 from agisdk.REAL.browsergym.webclones.task_config import TaskConfig
 from agisdk.REAL.logging import logger as rich_logger
 
 
 
-################################################################################
-# Minimal Playwright “computer”
-################################################################################
+
 
 
 class PlaywrightComputer:
@@ -35,7 +33,7 @@ class PlaywrightComputer:
         self.ctx = self.browser.new_context(viewport={"width": w, "height": h}, device_scale_factor=1)
         self.page = self.ctx.new_page()
 
-    # ---------------------------------------------------------------- Tools
+
     def screenshot_b64(self) -> str:
         return base64.b64encode(self.page.screenshot(full_page=False)).decode()
 
@@ -59,12 +57,14 @@ class PlaywrightComputer:
         self.page.keyboard.type(text, delay=delay)
 
     def keypress(self, keys: List[str]):
-        # Map common key names to Playwright format
+
         key_mapping = {
             "HOME": "Home",
             "END": "End",
             "PAGE_UP": "PageUp",
+            "PAGEUP": "PageUp",
             "PAGE_DOWN": "PageDown",
+            "PAGEDOWN": "PageDown",
             "ARROW_UP": "ArrowUp",
             "ARROWUP": "ArrowUp",
             "ARROW_DOWN": "ArrowDown",
@@ -86,7 +86,7 @@ class PlaywrightComputer:
             "META": "Meta",
             "CMD": "Meta"
         }
-        
+
         mapped_keys = [key_mapping.get(key, key) for key in keys]
         self.page.keyboard.press("+".join(mapped_keys))
 
@@ -107,11 +107,11 @@ class PlaywrightComputer:
         self.page.mouse.move(end_x, end_y)
         self.page.mouse.up(button=button)
 
-    # Convenience
+
     def goto(self, url: str):
         self.page.goto(url, wait_until="load", timeout=30000)
 
-    # Clean-up
+
     def close(self):
         with suppress(Exception):
             self.ctx.close(); self.browser.close(); self._pw.stop()
@@ -122,15 +122,13 @@ class PlaywrightComputer:
     def __exit__(self, exc_type, exc, tb):
         self.close()
 
-################################################################################
-# Runner
-################################################################################
+
 
 MODEL = "computer-use-preview"
 WIDTH = 1024
 HEIGHT = 768
-ITER_LIMIT = 40
-TIME_LIMIT = 300  # seconds per task
+ITER_LIMIT = 120
+TIME_LIMIT = 800
 
 client = OpenAI()
 
@@ -141,7 +139,7 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
     base = task["website"]["url"]
     cfg_url = f"{base}/config?run_id={run_id}&task_id={tid}&removePopup=true"
 
-    # Start task logging
+
     rich_logger.task_start(f"{tid}: {goal[:50]}{'...' if len(goal) > 50 else ''}", "OpenAI-CUA")
 
     res: Dict[str, Any] = {
@@ -165,7 +163,7 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
             pending_safety: List[Dict[str, str]] = []
             last_call_id: Optional[str] = None
 
-            # ------------------ loop
+
             for it in range(ITER_LIMIT):
                 res["iterations"] = it + 1
                 if time.time() - wall0 > TIME_LIMIT:
@@ -178,7 +176,7 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
                     ]
                     prev_id = None
                 else:
-                    # send screenshot as computer_call_output
+
                     try:
                         screenshot_b64 = comp.screenshot_b64()
                         input_payload = [
@@ -195,7 +193,7 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
                     except PlaywrightError as pe:
                         rich_logger.error(f"Failed to take screenshot: {pe}")
                         raise RuntimeError("Browser context closed during screenshot") from pe
-                    prev_id = resp.id  # defined below
+                    prev_id = resp.id
 
                 try:
                     resp = client.responses.create(
@@ -215,14 +213,14 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
                 except OpenAIError as e:
                     raise RuntimeError(f"OpenAI error: {e}") from e
 
-                # Handle outputs
+
                 comp_calls = [o for o in resp.output if o.type == "computer_call"]
                 if comp_calls:
                     for call in comp_calls:
                         act = call.action
                         last_call_id = call.call_id
-                        
-                        # Log the action being taken
+
+
                         action_summary = f"{act.type}"
                         if act.type == "click":
                             action_summary += f"({act.x}, {act.y})"
@@ -235,35 +233,35 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
                         elif act.type == "drag":
                             if hasattr(act, 'path') and act.path:
                                 try:
-                                    # Try to access path as list first
+
                                     if hasattr(act.path, '__getitem__'):
                                         start_point = act.path[0]
                                         end_point = act.path[-1]
                                         action_summary += f"({start_point['x']}, {start_point['y']}) -> ({end_point['x']}, {end_point['y']})"
                                     else:
-                                        # Handle ActionDragPath object
+
                                         action_summary += f"(drag path)"
                                 except (TypeError, IndexError, KeyError):
                                     action_summary += "(drag - invalid path)"
                             else:
                                 action_summary += "(drag - no path)"
-                        
+
                         rich_logger.task_step(it + 1, action_summary)
                         res["actions_taken"].append({"step": it + 1, "action": action_summary})
-                        
-                        # Execute tool call
+
+
                         try:
                             if act.type == "click":
                                 comp.click(act.x, act.y, getattr(act, "button", "left"))
                             elif act.type == "double_click":
                                 comp.double_click(act.x, act.y, getattr(act, "button", "left"))
                             elif act.type == "scroll":
-                                # Handle different scroll parameter formats
+
                                 start_x = getattr(act, 'start_x', getattr(act, 'x', WIDTH // 2) if hasattr(act, 'x') else WIDTH // 2)
                                 start_y = getattr(act, 'start_y', getattr(act, 'y', HEIGHT // 2) if hasattr(act, 'y') else HEIGHT // 2)
                                 dx = getattr(act, 'dx', getattr(act, 'delta_x', 0))
                                 dy = getattr(act, 'dy', getattr(act, 'delta_y', 0))
-                                comp.scroll(start_x, start_y, dx, dy)
+                                comp.scroll(start_x, start_y, dx*3, dy*3)
                             elif act.type == "type":
                                 comp.type(act.text)
                             elif act.type == "keypress":
@@ -273,38 +271,51 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
                             elif act.type == "drag":
                                 if hasattr(act, 'path') and act.path:
                                     try:
-                                        # Try to access path as list first
-                                        if hasattr(act.path, '__getitem__'):
+
+                                        if hasattr(act.path, '__getitem__') and hasattr(act.path, '__len__'):
                                             start_point = act.path[0]
                                             end_point = act.path[-1]
                                             button = getattr(act, 'button', 'left')
                                             comp.drag(start_point['x'], start_point['y'], end_point['x'], end_point['y'], button)
                                         else:
-                                            # Handle ActionDragPath object - check for start_x, start_y, end_x, end_y attributes
-                                            start_x = getattr(act.path, 'start_x', getattr(act, 'start_x', 0))
-                                            start_y = getattr(act.path, 'start_y', getattr(act, 'start_y', 0))
-                                            end_x = getattr(act.path, 'end_x', getattr(act, 'end_x', 0))
-                                            end_y = getattr(act.path, 'end_y', getattr(act, 'end_y', 0))
+
+
+                                            start_x = getattr(act.path, 'start_x', None)
+                                            start_y = getattr(act.path, 'start_y', None)
+                                            end_x = getattr(act.path, 'end_x', None)
+                                            end_y = getattr(act.path, 'end_y', None)
+
+
+                                            if start_x is None:
+                                                start_x = getattr(act, 'start_x', 0)
+                                            if start_y is None:
+                                                start_y = getattr(act, 'start_y', 0)
+                                            if end_x is None:
+                                                end_x = getattr(act, 'end_x', 0)
+                                            if end_y is None:
+                                                end_y = getattr(act, 'end_y', 0)
+
                                             button = getattr(act, 'button', 'left')
                                             comp.drag(start_x, start_y, end_x, end_y, button)
                                     except (TypeError, IndexError, KeyError, AttributeError) as e:
                                         rich_logger.warning(f"Drag action failed: {e}")
+
                                 else:
                                     rich_logger.warning("Drag action missing path data")
                             elif act.type == "wait":
-                                # Handle different wait parameter formats
+
                                 wait_time = getattr(act, 'ms', getattr(act, 'duration', getattr(act, 'seconds', 1000)))
                                 comp.wait(wait_time)
                             elif act.type == "screenshot":
-                                pass  # handled by next iteration’s screenshot
+                                pass
                         except PlaywrightError as pe:
                             rich_logger.error(f"Playwright error: {pe}")
                             continue
 
-                        pending_safety = [{"id": sc.id} for sc in call.pending_safety_checks]
-                    continue  # next iteration
+                        pending_safety = [{"id": sc.id, "code": sc.code, "message": sc.message} for sc in call.pending_safety_checks]
+                    continue
 
-                # No computer_call → look for text answer
+
                 texts = [o for o in resp.output if o.type == "text"]
                 model_ans = texts[0].text if texts else ""
                 res["response"] = model_ans
@@ -312,14 +323,14 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
             else:
                 raise TimeoutError("iteration limit reached without final answer")
 
-            # ------------------ evaluate
-            # Navigate to /finish endpoint to get final state JSON
+
+
             finish_url = f"{base}/finish"
             env_state = {}
             try:
                 rich_logger.info(f"🌐 Navigating to {finish_url} to extract final state...")
                 comp.goto(finish_url)
-                comp.wait(2000)  # Wait for page to load
+                comp.wait(2000)
                 with suppress(PlaywrightError, json.JSONDecodeError):
                     pre = comp.page.query_selector("pre")
                     if pre:
@@ -335,15 +346,15 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
             reward, _, msg, _ = ev.evaluate(env_state=env_state, model_response=model_ans)
             rich_logger.info(f"🌍 Environment State: {json.dumps(env_state, indent=2)[:200]}...")
             rich_logger.info(f"🤖 Model Response: {model_ans[:100]}{'...' if len(model_ans) > 100 else ''}")
-            
+
             success = reward > 0
             res["success"] = success
             res["ok"] = True
             res["reward"] = reward
             res["eval_message"] = msg
-            res["env_state"] = env_state  # Store env_state for individual task saving
-            
-            # Log task completion
+            res["env_state"] = env_state
+
+
             elapsed = time.time() - wall0
             rich_logger.task_complete(success, reward, elapsed, tid)
 
@@ -357,30 +368,27 @@ def run_task(task: Dict[str, Any], run_id: str, headless: bool) -> Dict[str, Any
     res["end_time"] = datetime.now(timezone.utc).isoformat()
     return res
 
-################################################################################
-# CLI
-################################################################################
+
 
 def create_results_directory() -> Path:
-    """Create results directory structure similar to agisdk."""
-    # Use relative path from the agisdk root
-    results_dir = Path("results")
+
+    current_dir = Path(__file__).parent.parent
+    results_dir = current_dir / "results"
     results_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Create timestamped subdirectory
+
+
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     run_dir = results_dir / f"openai_cua_{timestamp}"
     run_dir.mkdir(exist_ok=True)
-    
+
     return run_dir
 
 def save_results_to_file(results: List[Dict[str, Any]], run_dir: Path, run_name: str) -> None:
-    """Save detailed results to JSON file."""
-    
-    # Calculate summary statistics
+
+
     successful_tasks = [r for r in results if r.get("success", False)]
     failed_tasks = [r for r in results if not r.get("ok", False)]
-    
+
     summary = {
         "run_name": run_name,
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -393,29 +401,29 @@ def save_results_to_file(results: List[Dict[str, Any]], run_dir: Path, run_name:
         "total_time": sum(r["elapsed_time"] for r in results),
         "tasks": results
     }
-    
-    # Save to JSON file
+
+
     results_file = run_dir / "results.json"
     with open(results_file, 'w') as f:
         json.dump(summary, f, indent=2)
-    
+
     rich_logger.info(f"📁 Results saved to: {results_file}")
-    
-    # Save summary to separate file
+
+
     summary_file = run_dir / "summary.json"
     summary_only = {k: v for k, v in summary.items() if k != "tasks"}
     with open(summary_file, 'w') as f:
         json.dump(summary_only, f, indent=2)
-    
-    # Save individual task files
+
+
     tasks_dir = run_dir / "tasks"
     tasks_dir.mkdir(exist_ok=True)
-    
+
     for task_result in results:
         task_id = task_result.get("task_id", "unknown")
         task_file = tasks_dir / f"task_{task_id}.json"
-        
-        # Create individual task result with additional metadata
+
+
         individual_task = {
             "task_id": task_id,
             "run_name": run_name,
@@ -433,12 +441,12 @@ def save_results_to_file(results: List[Dict[str, Any]], run_dir: Path, run_name:
             "start_time": task_result.get("start_time"),
             "end_time": task_result.get("end_time"),
         }
-        
+
         with open(task_file, 'w') as f:
             json.dump(individual_task, f, indent=2)
-        
+
         rich_logger.info(f"📄 Task {task_id} saved to: {task_file}")
-    
+
     rich_logger.info(f"📁 Individual task files saved to: {tasks_dir}")
 
 def main() -> None:
@@ -455,8 +463,8 @@ def main() -> None:
     args = argp.parse_args()
 
     run_id = args.run_id
-    
-    # Create results directory
+
+
     run_dir = create_results_directory()
     rich_logger.info(f"📁 Results directory: {run_dir}")
 
@@ -472,28 +480,28 @@ def main() -> None:
         for f in as_completed(futs):
             result = f.result()
             results.append(result)
-            # Save results after each task completion
+
             save_results_to_file(results, run_dir, args.run_name)
 
-    # Calculate and display summary
+
     successful = [r for r in results if r.get("success", False)]
     failed = [r for r in results if not r.get("ok", False)]
     success_rate = len(successful) / len(results) * 100 if results else 0
     avg_time = sum(r["elapsed_time"] for r in results) / len(results) if results else 0
-    
-    # Rich logging for summary
+
+
     rich_logger.success("🎉 BENCHMARK RESULTS")
     rich_logger.info(f"Tasks completed successfully: {len(successful)}/{len(results)}")
     rich_logger.info(f"Success rate: {success_rate:.2f}%")
     rich_logger.info(f"Average time: {avg_time:.2f} seconds")
     rich_logger.info(f"Total time: {sum(r['elapsed_time'] for r in results):.2f} seconds")
-    
+
     if failed:
         rich_logger.warning(f"Failed tasks: {len(failed)}")
         for task in failed:
             rich_logger.error(f"  - {task['task_id']}: {task.get('error', 'Unknown error')}")
-    
-    # Save results to file
+
+
     save_results_to_file(results, run_dir, args.run_name)
 
 
