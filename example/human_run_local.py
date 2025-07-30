@@ -36,15 +36,31 @@ def run_task(task: dict, run_id: str, headless: bool = True) -> dict:
         "error": None,
         "response": None,
         "elapsed_time": 0,
-        "t": 0
+        "t": 0,
+        "click_count": 0
     }
 
     print(f"Starting task: {tid} - {goal[:200]}...")
     try:
         with NovaAct(starting_page=cfg, headless=headless) as bot:
+            # Set up click tracking
+            click_count = 0
+            
+            def track_click(event):
+                nonlocal click_count
+                click_count += 1
+                print(f"Click #{click_count} detected at coordinates ({event.get('x', 'N/A')}, {event.get('y', 'N/A')})")
+            
+            # Register click event listener
+            bot.page.on("click", track_click)
+            
             bot.go_to_url(base)
             try:
                 result["response"] = input("Return the response to finish the task:")
+                
+                # Update click count in result
+                result["click_count"] = click_count
+                print(f"Total clicks recorded: {click_count}")
                 
                 # Finish the task
                 bot.go_to_url(f"{base}/finish")
@@ -88,6 +104,15 @@ def main():
     for task in tasks:
         result = run_task(task, args.run_id, not args.no_headless)
         results.append(result)
+        print(f"Task {result['id']}: {result['click_count']} clicks, Success: {result['success']}")
+    
+    # Print summary for all tasks
+    total_clicks = sum(r['click_count'] for r in results)
+    successful_tasks = sum(1 for r in results if r['success'])
+    print(f"\n=== SUMMARY ===")
+    print(f"Total tasks: {len(results)}")
+    print(f"Successful tasks: {successful_tasks}")
+    print(f"Total clicks across all tasks: {total_clicks}")
     
     return results
     

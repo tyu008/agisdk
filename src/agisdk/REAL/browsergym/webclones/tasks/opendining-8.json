@@ -1,6 +1,6 @@
 {
   "id": "opendining-8",
-  "goal": "Identify and book the restaurant with the lowest reviews. For fields you don't know the answer for, just fill them in with anything of your choice.",
+  "goal": "Identify and book the restaurant with the lowest rating. For fields you don't know the answer for, just fill them in with anything of your choice.",
   "website": {
     "id": "opendining",
     "name": "OpenDining",
