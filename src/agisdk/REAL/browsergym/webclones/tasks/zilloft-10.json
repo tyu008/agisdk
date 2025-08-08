@@ -6,7 +6,7 @@
     "name": "Zilloft",
     "similarTo": "Zillow",
     "previewImage": "/websitePreviews/zilloft_preview.jpg",
-    "url": "https://real-zilloft-gs64ask7g-real-sites.vercel.app"
+    "url": "https://evals-zilloft.vercel.app"
   },
   "difficulty": "hard",
   "challengeType": "retrieval",
@@ -20,4 +20,4 @@
   ],
   "points": 1,
   "config": {}
-} 
+}

@@ -6,7 +6,7 @@
     "name": "GoMail",
     "similarTo": "Gmail",
     "previewImage": "/websitePreviews/gomail_preview.jpg",
-    "url": "http://real-gomail-9q9gt012g-real-sites.vercel.app"
+    "url": "https://evals-gomail.vercel.app"
   },
   "difficulty": "medium",
   "challengeType": "retrieval",

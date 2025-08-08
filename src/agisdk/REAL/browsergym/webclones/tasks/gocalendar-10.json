@@ -6,7 +6,7 @@
     "name": "GoCalendar",
     "similarTo": "Google Calendar",
     "previewImage": "/websitePreviews/gocalendar_preview.jpg",
-    "url": "real-gocalendar-5o0l1rug2-real-sites.vercel.app"
+    "url": "https://evals-gocalendar.vercel.app"
   },
   "difficulty": "hard",
   "challengeType": "retrieval_action",
@@ -39,4 +39,4 @@
   ],
   "points": 1,
   "config": {}
-} 
+}

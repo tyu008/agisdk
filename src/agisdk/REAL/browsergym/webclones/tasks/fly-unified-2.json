@@ -6,11 +6,11 @@
     "name": "Fly Unified",
     "similarTo": "United Airlines",
     "previewImage": "/websitePreviews/fly-unified_preview.jpg",
-    "url": "https://real-flyunified-qokk7t67g-real-sites.vercel.app"
+    "url": "https://evals-fly-unified.vercel.app"
   },
   "difficulty": "easy",
   "challengeType": "action",
-  "possible":true,
+  "possible": true,
   "evals": [
     {
       "description": "correct departure city",
@@ -114,8 +114,7 @@
       "expected_value": "johndoe@example.com",
       "query": "differences.bookedFlights.added.\"0\".paymentInfo.email"
     }
-
   ],
   "points": 1,
   "config": {}
-} 
+}

@@ -6,7 +6,7 @@
     "name": "TopWork",
     "similarTo": "Upwork",
     "previewImage": "/websitePreviews/topwork_preview.jpg",
-    "url": "https://real-topwork-on3lcbo9s-real-sites.vercel.app"
+    "url": "https://evals-topwork.vercel.app"
   },
   "difficulty": "medium",
   "challengeType": "action",
@@ -45,4 +45,4 @@
   ],
   "points": 1,
   "config": {}
-} 
+}

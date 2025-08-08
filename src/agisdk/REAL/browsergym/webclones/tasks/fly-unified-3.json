@@ -6,7 +6,7 @@
     "name": "Fly Unified",
     "similarTo": "United Airlines",
     "previewImage": "/websitePreviews/fly-unified_preview.jpg",
-    "url": "https://real-flyunified-qokk7t67g-real-sites.vercel.app"
+    "url": "https://evals-fly-unified.vercel.app"
   },
   "difficulty": "medium",
   "challengeType": "retrieval",
@@ -20,4 +20,4 @@
   ],
   "points": 1,
   "config": {}
-} 
+}

@@ -6,14 +6,14 @@
     "name": "Fly Unified",
     "similarTo": "United Airlines",
     "previewImage": "/websitePreviews/fly-unified_preview.jpg",
-    "url": "https://real-flyunified-qokk7t67g-real-sites.vercel.app"
+    "url": "https://evals-fly-unified.vercel.app"
   },
   "difficulty": "easy",
   "challengeType": "retrieval",
   "possible": true,
   "evals": [
     {
-      "possible":true,
+      "possible": true,
       "type": "llm_boolean",
       "expected_value": true,
       "rubric": "Does the answer indicate that the earliest flight is at 8:00 AM?"
@@ -21,4 +21,4 @@
   ],
   "points": 1,
   "config": {}
-} 
+}

@@ -6,7 +6,7 @@
     "name": "Omnizon",
     "similarTo": "Amazon",
     "previewImage": "/websitePreviews/omnizon_preview.jpg",
-    "url": "https://real-omnizon-crih1fho3-real-sites.vercel.app"
+    "url": "https://evals-omnizon.vercel.app"
   },
   "difficulty": "hard",
   "challengeType": "retrieval-action",
@@ -37,4 +37,4 @@
   ],
   "points": 1,
   "config": {}
-} 
+}

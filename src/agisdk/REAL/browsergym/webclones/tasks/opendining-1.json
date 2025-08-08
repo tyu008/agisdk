@@ -6,7 +6,7 @@
     "name": "OpenDining",
     "similarTo": "OpenTable",
     "previewImage": "/websitePreviews/opendining_preview.jpg",
-    "url": "https://real-opendining-4ie5urers-real-sites.vercel.app"
+    "url": "https://evals-opendining.vercel.app"
   },
   "difficulty": "easy",
   "challengeType": "retrieval-action",
@@ -15,9 +15,9 @@
     {
       "type": "llm_boolean",
       "expected_value": true,
-      "rubric": "Does the answer include at least five of these restaurant names: The Royal Dine, Vintage Bites, Evening Delight, River View Café, Fancy Lights Bistro, Bar Central, Spacious Eats, Yellowy Bistro, Crowded Corner, Expensive Taste, Ocean Breeze, Bistro Soleil?"
+      "rubric": "Does the answer include at least five of these restaurant names: The Royal Dine, Vintage Bites, Evening Delight, River View Caf\u00e9, Fancy Lights Bistro, Bar Central, Spacious Eats, Yellowy Bistro, Crowded Corner, Expensive Taste, Ocean Breeze, Bistro Soleil?"
     }
   ],
   "points": 1,
   "config": {}
-} 
+}

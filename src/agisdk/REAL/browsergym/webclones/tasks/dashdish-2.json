@@ -6,7 +6,7 @@
     "name": "DashDish",
     "similarTo": "Doordash",
     "previewImage": "/websitePreviews/dashdish_preview.jpg",
-    "url": "https://real-dashdish-fnq7w19sk-real-sites.vercel.app"
+    "url": "https://evals-dashdish.vercel.app"
   },
   "difficulty": "easy",
   "challengeType": "action",
@@ -17,7 +17,6 @@
       "type": "jmespath",
       "expected_value": "Papa Johns Pizza",
       "query": "differences.foodOrders.added.\"0\".cartItems[0].restaurantName"
-
     },
     {
       "description": "correct food",
@@ -40,4 +39,4 @@
   ],
   "points": 1,
   "config": {}
-} 
+}

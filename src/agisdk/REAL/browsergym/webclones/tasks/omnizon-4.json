@@ -6,25 +6,28 @@
     "name": "Omnizon",
     "similarTo": "Amazon",
     "previewImage": "/websitePreviews/omnizon_preview.jpg",
-    "url": "https://real-omnizon-crih1fho3-real-sites.vercel.app"
+    "url": "https://evals-omnizon.vercel.app"
   },
   "difficulty": "hard",
   "challengeType": "action",
   "possible": true,
   "evals": [
-  {
-    "type": "jmespath",
-    "description": "exact product match",
-    "expected_value": ["15","61"],
-    "query": "sort_by(orderDetailsDiff.added.\"0\".order.cart, &id)[].id"
-  },
-  {
-    "type": "jmespath",
-    "description": "1 of each product",
-    "expected_value": true,
-    "query": "length(orderDetailsDiff.added.\"0\".order.cart[?quantity != `1`]) == `0`"
-  }
+    {
+      "type": "jmespath",
+      "description": "exact product match",
+      "expected_value": [
+        "15",
+        "61"
+      ],
+      "query": "sort_by(orderDetailsDiff.added.\"0\".order.cart, &id)[].id"
+    },
+    {
+      "type": "jmespath",
+      "description": "1 of each product",
+      "expected_value": true,
+      "query": "length(orderDetailsDiff.added.\"0\".order.cart[?quantity != `1`]) == `0`"
+    }
   ],
   "points": 1,
   "config": {}
-} 
+}
