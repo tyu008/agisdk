@@ -114,7 +114,10 @@ if RAY_AVAILABLE:
         success = exp_record.get('cum_reward', 0) == 1
         reward = exp_record.get('cum_reward', 0)
         
-        rich_logger.task_complete(success, reward, elapsed_time)
+        # Extract task_id from task_name (e.g., "omnizon-1" from "webclones.omnizon-1")
+        task_id = task_name.split('.', 1)[1] if '.' in task_name else task_name
+        
+        rich_logger.task_complete(success, reward, elapsed_time, task_id)
         
         return task_name, exp_record
 
@@ -158,7 +161,7 @@ class harness:
         Initialize the harness with the provided configuration.
         
         Args:
-            model: Name of the AI model to use (e.g., "gpt-4o")
+            model: Name of the AI model to use (e.g., "gpt-4o", "gpt-5", "gpt-5-mini", "gpt-5-nano")
             agentargs: Arguments for a custom agent (if not using a built-in model)
             task_name: Specific task name to run (e.g., "webclones.omnizon-1")
             task_type: Task type to run (e.g., "omnizon")
@@ -760,7 +763,10 @@ class harness:
         success = exp_record.get('cum_reward', 0) == 1
         reward = exp_record.get('cum_reward', 0)
         
-        rich_logger.task_complete(success, reward, elapsed_time)
+        # Extract task_id from task_name (e.g., "omnizon-1" from "webclones.omnizon-1")
+        task_id = task_name.split('.', 1)[1] if '.' in task_name else task_name
+        
+        rich_logger.task_complete(success, reward, elapsed_time, task_id)
         
         return task_name, exp_record
     

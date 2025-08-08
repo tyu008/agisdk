@@ -110,7 +110,7 @@ class RichLogger:
             content += f"\n[{Colors.SECONDARY}]{details}[/{Colors.SECONDARY}]"
         self.print(content)
     
-    def task_complete(self, success: bool, reward: float = None, time_taken: float = None, task_name: str = None):
+    def task_complete(self, success: bool, reward: float = None, time_taken: float = None, task_id: str = None):
         """Print a task completion message."""
         self.print(f"[{Colors.SECONDARY}]─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ──[/{Colors.SECONDARY}]")
         if success:
@@ -119,8 +119,8 @@ class RichLogger:
             status = f"[{Colors.ERROR}]📊 Task Results - ❌ Task Failed[/{Colors.ERROR}]"
         
         content = status
-        if task_name:
-            content += f" [{Colors.INFO}]🎯 Task:[/{Colors.INFO}] [{Colors.VALUE}]{task_name}[/{Colors.VALUE}]"
+        if task_id:
+            content += f" [{Colors.INFO}]🆔 Task ID:[/{Colors.INFO}] [{Colors.VALUE}]{task_id}[/{Colors.VALUE}]"
         if reward is not None:
             content += f" [{Colors.INFO}]💰 Reward:[/{Colors.INFO}] [{Colors.VALUE}]{reward}[/{Colors.VALUE}]"
         if time_taken is not None:
