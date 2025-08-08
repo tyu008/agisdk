@@ -9,7 +9,7 @@
     "url": "https://evals-networkin.vercel.app"
   },
   "difficulty": "medium",
-  "challengeType": "retrieval_action",
+  "challengeType": "retrieval-action",
   "possible": true,
   "evals": [
     {

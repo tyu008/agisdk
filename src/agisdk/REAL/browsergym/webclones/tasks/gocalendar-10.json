@@ -9,7 +9,7 @@
     "url": "https://evals-gocalendar.vercel.app"
   },
   "difficulty": "hard",
-  "challengeType": "retrieval_action",
+  "challengeType": "retrieval-action",
   "possible": true,
   "evals": [
     {
