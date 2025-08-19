@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <b>Build, evaluate, and level up your AI agents — for the real web.</b>
+  <b>Build, evaluate, and level up your AI agents for the real web.</b>
 </p>
 
 <p align="center">
@@ -33,7 +33,7 @@
 
 **AGI SDK** is a toolkit for **building** and **evaluating** AI browser agents in real-world environments.
 
-It powers [REAL Bench](https://realevals.xyz) — the first high-fidelity benchmark for AI agents navigating modern websites like Amazon, DoorDash, Airbnb, and more.
+It powers [REAL Bench](https://realevals.xyz): the first high-fidelity benchmark for AI agents navigating modern websites like Amazon, DoorDash, Airbnb, and more.
 
 🔹 **Train agents** to browse and interact with real apps  
 🔹 **Benchmark agents** with robust, standardized tasks  
@@ -236,7 +236,7 @@ We welcome contributions of all kinds:
 - 📢 Feature requests? [Open an Issue](https://github.com/agi-inc/agisdk/issues)
 - 🐛 Bug reports? [Create a ticket](https://github.com/agi-inc/agisdk/issues)
 - 📈 Improve REAL tasks? Join our [Project Board](https://github.com/orgs/agi-inc/projects/2)
-- 🛠️ Submit code? Fork + PR — we love clean commits!
+- 🛠️ Submit code? Fork + PR - we love clean commits!
 
 Let's build the future of agents together. 🔥
 
@@ -247,5 +247,5 @@ Let's build the future of agents together. 🔥
 ## ⭐️ Why AGI SDK?
 
 Because **your agents deserve better** than toy environments. <br>
-Because **the real web is messy** — and that's where the magic happens. <br>
-Because **the future is agentic** — and it starts here.
+Because **the real web is messy** and that's where the magic happens. <br>
+Because **the future is agentic** and it starts here.
