@@ -151,6 +151,7 @@ class BrowserEnv(gym.Env, ABC):
                 ),
                 "goal": Unicode(min_length=0, max_length=TEXT_MAX_LENGTH),
                 "goal_object": gym.spaces.Sequence(AnyDict()),
+                "task_id": Unicode(min_length=0, max_length=TEXT_MAX_LENGTH),
                 "open_pages_urls": gym.spaces.Sequence(
                     Unicode(min_length=0, max_length=TEXT_MAX_LENGTH)
                 ),
@@ -706,11 +707,22 @@ document.addEventListener("visibilitychange", () => {
         # post-extraction cleanup of temporary info in dom
         _post_extract(self.page)
 
+        task_id = getattr(self.task, "task_id", None)
+        if task_id is None:
+            task_getter = getattr(self.task.__class__, "get_task_id", None)
+            if callable(task_getter):
+                try:
+                    task_id = task_getter()
+                except TypeError:
+                    task_id = None
+        task_id = str(task_id) if task_id is not None else ""
+
         # obs is generic to all tasks
         obs = {
             "chat_messages": copy.deepcopy(self.chat.messages),
             "goal": _try_to_extract_legacy_goal(self.goal_object),  # legacy goal, deprecated
             "goal_object": self.goal_object,  # new goal format, list of messages openai style
+            "task_id": task_id,
             "open_pages_urls": [page.url for page in self.context.pages],
             "active_page_index": np.asarray([self.context.pages.index(self.page)]),
             "url": self.page.url,
