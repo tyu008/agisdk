@@ -40,12 +40,14 @@ Dynamic: license-file
   <h1 align="center">🚀 AGI SDK</h1>
 </p>
 
+
 <p align="center">
   <a href="https://arxiv.org/abs/2504.11543">📄 Paper</a> • 
   <a href="https://www.theagi.company/blog/introducing-real-bench">📝 Blog</a> • 
   <a href="https://www.theagi.company">🏢 AGI Inc</a> • 
   <a href="https://www.realevals.xyz">🏆 Leaderboard</a>
 </p>
+
 
 <p align="center">
   <a href="https://pypi.org/project/agisdk"><img src="https://img.shields.io/pypi/v/agisdk?color=brightgreen" alt="PyPI version"></a>
@@ -61,6 +63,9 @@ Dynamic: license-file
 <p align="center">
   <img src="docs/images/real.gif" alt="REAL benchmark demo" width="600">
 </p>
+
+
+
 
 # ✨ What is AGI SDK?
 
@@ -91,6 +96,7 @@ export OPENAI_API_KEY="your-api-key"   # any supported provider key works
 
 On Apple Silicon run `brew install --cask playwright` first.
 
+
 ## ⏱️ 60-second Quick-Start
 
 Here's a minimal example to get you started for benchmarking an AI agent on the REAL Bench environment:
@@ -106,7 +112,6 @@ harness = REAL.harness(
 
 print(harness.run())      # 🎉
 ```
-
 Need more control? [See full examples ›](/example)
 
 ## 🔥 Features
@@ -117,6 +122,8 @@ Need more control? [See full examples ›](/example)
 - **Customizable harness**: plug your own agents
 - **Multi-model support**: OpenAI, Anthropic, OpenRouter, or your own model
 - **Parallel evaluation** for faster experiments
+
+
 
 ## Running Custom Agents
 
@@ -147,19 +154,19 @@ The AGI SDK includes high-fidelity, fully-deterministic websites for agents to e
 
 The benchmark includes these environments:
 
-| App Clone                       | Task Prefix               | Example Use Case          |
-| :------------------------------ | :------------------------ | :------------------------ |
-| 🛒 Amazon → Omnizon             | `webclones.omnizon-*`     | Buy a laptop, find a gift |
-| 🍔 DoorDash → DashDish          | `webclones.dashdish-*`    | Order dinner              |
-| ✈️ United → FlyUnified          | `webclones.fly-unified-*` | Book a flight             |
-| 🏡 Airbnb → Staynb              | `webclones.staynb-*`      | Reserve accommodation     |
-| 📅 Google Calendar → GoCalendar | `webclones.gocalendar-*`  | Schedule a meeting        |
-| 📬 Gmail → GoMail               | `webclones.gomail-*`      | Compose an email          |
-| 🍽️ OpenTable → OpenDining       | `webclones.opendining-*`  | Book a restaurant         |
-| 👔 LinkedIn → NetworkIn         | `webclones.networkin-*`   | Accept a connection       |
-| 🚗 Uber → Udriver               | `webclones.udriver-*`     | Book a ride               |
-| 💼 UpWork → TopWork             | `webclones.topwork-*`     | Find a freelance gig      |
-| 🏠 Zillow → Zilloft             | `webclones.zilloft-*`     | Browse houses             |
+| App Clone | Task Prefix | Example Use Case |
+| :--- | :--- | :--- |
+| 🛒 Amazon → Omnizon | `webclones.omnizon-*` | Buy a laptop, find a gift |
+| 🍔 DoorDash → DashDish | `webclones.dashdish-*` | Order dinner |
+| ✈️ United → FlyUnified | `webclones.fly-unified-*` | Book a flight |
+| 🏡 Airbnb → Staynb | `webclones.staynb-*` | Reserve accommodation |
+| 📅 Google Calendar → GoCalendar | `webclones.gocalendar-*` | Schedule a meeting |
+| 📬 Gmail → GoMail | `webclones.gomail-*` | Compose an email |
+| 🍽️ OpenTable → OpenDining | `webclones.opendining-*` | Book a restaurant |
+| 👔 LinkedIn → NetworkIn | `webclones.networkin-*` | Accept a connection |
+| 🚗 Uber → Udriver | `webclones.udriver-*` | Book a ride |
+| 💼 UpWork → TopWork | `webclones.topwork-*` | Find a freelance gig |
+| 🏠 Zillow → Zilloft | `webclones.zilloft-*` | Browse houses |
 
 Each task comes with **human-written goals** designed to stress-test agent capabilities.
 
@@ -260,10 +267,10 @@ REAL.harness(
 )
 ```
 
+
 ## 🤝 Contributing
 
 We welcome contributions of all kinds:
-
 - 📢 Feature requests? [Open an Issue](https://github.com/agi-inc/agisdk/issues)
 - 🐛 Bug reports? [Create a ticket](https://github.com/agi-inc/agisdk/issues)
 - 📈 Improve REAL tasks? Join our [Project Board](https://github.com/orgs/agi-inc/projects/2)
@@ -272,7 +279,6 @@ We welcome contributions of all kinds:
 Let's build the future of agents together. 🔥
 
 ## 💬 Community
-
 - [Join our Discord](https://discord.gg/c95EJDfXzx) (_coming soon!_)
 - [Follow AGI Inc. on LinkedIn](https://www.linkedin.com/company/the-agi-company/)
 
