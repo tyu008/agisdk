@@ -1,3 +1,6 @@
+# Custom agent: minimal scaffolding to build your own agent on.
+# It doesn't do anything right now! If you use this, you're starting from scratch!
+
 import dataclasses
 from typing import Dict, Tuple, Optional
 
