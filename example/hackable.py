@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+# A minimal agent that you can modify to suit your needs. 
+
 import argparse
 import base64
 import dataclasses
