@@ -13,3 +13,5 @@ build
 .env.*
 
 **/.claude/settings.local.json
+
+uv.lock

@@ -56,3 +56,8 @@ where = ["src"]
 [tool.setuptools.package-data]
 "agisdk.REAL.browsergym.webclones" = ["tasks/*.json", "tasks/experimental/*.json"]
 "agisdk.REAL.browsergym.core" = ["chat_files/*.html", "chat_files/img/*.svg", "chat_files/*.png", "javascript/*.js"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]

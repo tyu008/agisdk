@@ -43,6 +43,7 @@ src/agisdk/REAL/browsergym/utils/__init__.py
 src/agisdk/REAL/browsergym/utils/obs.py
 src/agisdk/REAL/browsergym/webclones/__init__.py
 src/agisdk/REAL/browsergym/webclones/base.py
+src/agisdk/REAL/browsergym/webclones/base_test.py
 src/agisdk/REAL/browsergym/webclones/evaluate.py
 src/agisdk/REAL/browsergym/webclones/task_config.py
 src/agisdk/REAL/browsergym/webclones/utils.py
