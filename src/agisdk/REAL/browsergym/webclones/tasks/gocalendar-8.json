@@ -1,21 +1,19 @@
 {
-  "id": "gocalendar-8",
-  "goal": "Compare the events on the \"Work\" calendar and the \"Personal\" calendar and list the total number of events on each for July 2024",
+  "id": "gocalendar_8",
+  "goal": "GoCalendar: Add a task to send an email to Ashley for Monday Morning",
   "website": {
     "id": "gocalendar",
     "name": "GoCalendar",
     "similarTo": "Google Calendar",
     "previewImage": "/websitePreviews/gocalendar_preview.jpg",
-    "url": "https://evals-gocalendar.vercel.app"
+    "url": "https://real-gocalendar-n1nw9ran1-real-sites.vercel.app"
   },
   "difficulty": "medium",
-  "challengeType": "retrieval",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer correctly state there are 15 events on the 'Work' calendar and 1 event on the 'Personal' calendar for July 2024?"
+      "script": "eval_gocalendar_8.py"
     }
   ],
   "points": 1,

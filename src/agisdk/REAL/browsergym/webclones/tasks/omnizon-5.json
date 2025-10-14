@@ -1,21 +1,19 @@
 {
-  "id": "omnizon-5",
-  "goal": "Search for the \"KTC 24 inch 1500R Curved Gaming Monitor\" click on it, and display the specifications from its product page.",
+  "id": "omnizon_5",
+  "goal": "Omnizon: Find me a coffee maker for under $100",
   "website": {
     "id": "omnizon",
     "name": "Omnizon",
     "similarTo": "Amazon",
     "previewImage": "/websitePreviews/omnizon_preview.jpg",
-    "url": "https://evals-omnizon.vercel.app"
+    "url": "https://real-omnizon-eq6za0727-real-sites.vercel.app"
   },
-  "difficulty": "hard",
+  "difficulty": "medium",
   "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer list multiple specifications of the KTC 24 inch 1500R Curved Gaming Monitor, such as size, resolution, refresh rate, or other technical details?"
+      "script": "eval_omnizon_5.py"
     }
   ],
   "points": 1,

@@ -1,21 +1,19 @@
 {
-  "id": "opendining-9",
-  "goal": "Search all menus and identify the restaurant offering the cheapest dish, along with its name and price.",
+  "id": "opendining_9",
+  "goal": "Show me restaurants in North Beach available on September 17th at 7:30. Book any open reservation for that time frame.",
   "website": {
     "id": "opendining",
     "name": "OpenDining",
     "similarTo": "OpenTable",
     "previewImage": "/websitePreviews/opendining_preview.jpg",
-    "url": "https://evals-opendining.vercel.app"
+    "url": "https://real-opendining-fdcw98zrb-real-sites.vercel.app"
   },
-  "difficulty": "hard",
-  "challengeType": "retrieval-action",
+  "difficulty": "medium",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer identify 'Taco Loco' as the restaurant and 'Carnitas Taco' as the cheapest dish, or another dish with a price of approximately $3-5?"
+      "script": "eval_opendining_9.py"
     }
   ],
   "points": 1,

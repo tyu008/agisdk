@@ -1,36 +1,19 @@
 {
-  "id": "gomail-3",
-  "goal": "Compose a new email to jonathan.smith@example.com with the subject \"Meeting Notes\" and body \"Please find the meeting notes attached.\"",
+  "id": "gomail_3",
+  "goal": "Clear out all my starred emails and send an email to Alexa Richardson about signing my work permit.",
   "website": {
     "id": "gomail",
     "name": "GoMail",
     "similarTo": "Gmail",
     "previewImage": "/websitePreviews/gomail_preview.jpg",
-    "url": "https://evals-gomail.vercel.app"
+    "url": "https://real-gomail-1glk4rtaf-real-sites.vercel.app"
   },
-  "difficulty": "easy",
+  "difficulty": "medium",
   "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "possible": true,
-      "type": "jmespath",
-      "expected_value": "jonathan.smith@example.com",
-      "query": "differences.emails.added[0].to[0]"
-    },
-    {
-      "possible": true,
-      "description": "correct subject",
-      "type": "jmespath",
-      "expected_value": "Meeting Notes",
-      "query": "differences.emails.added[0].subject"
-    },
-    {
-      "possible": true,
-      "description": "correct email content",
-      "type": "jmespath",
-      "expected_value": "<p>Please find the meeting notes attached.</p>",
-      "query": "differences.emails.added[0].content"
+      "script": "eval_gomail_3.py"
     }
   ],
   "points": 1,

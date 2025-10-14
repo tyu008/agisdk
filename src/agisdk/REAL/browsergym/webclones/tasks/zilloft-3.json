@@ -1,40 +1,19 @@
 {
-  "id": "zilloft-3",
-  "goal": "Find a home in San Diego priced under $150,000 with at least 2 bedrooms and request a tour. Use these details: Contact Name: John Doe, Email: johndoe@example.com, Phone: 555-123-4567, Tour Time: 2:00 PM, Tour Date: First available.",
+  "id": "zilloft_3",
+  "goal": "Find me houses in Boston, MA under 1 million dollars and then contact the agent of a house. For the house tour, schedule it for tomorrow 9 AM.",
   "website": {
     "id": "zilloft",
-    "name": "Zilloft",
+    "name": "ZilloFT",
     "similarTo": "Zillow",
     "previewImage": "/websitePreviews/zilloft_preview.jpg",
-    "url": "https://evals-zilloft.vercel.app"
+    "url": "https://real-zilloft-46k595h3n-real-sites.vercel.app"
   },
-  "difficulty": "easy",
-  "challengeType": "retrieval-action",
+  "difficulty": "medium",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "description": "correct contact name",
-      "type": "jmespath",
-      "expected_value": "John Doe",
-      "query": "differences.requestTours.added.\"0\".requestTourData.formValues.name"
-    },
-    {
-      "description": "correct email address",
-      "type": "jmespath",
-      "expected_value": "johndoe@example.com",
-      "query": "differences.requestTours.added.\"0\".requestTourData.formValues.email"
-    },
-    {
-      "description": "correct phone number",
-      "type": "jmespath",
-      "expected_value": "555-123-4567",
-      "query": "differences.requestTours.added.\"0\".requestTourData.formValues.phone"
-    },
-    {
-      "description": "correct tour time",
-      "type": "jmespath",
-      "expected_value": "2:00 PM",
-      "query": "differences.requestTours.added.\"0\".requestTourData.options[0].time"
+      "script": "eval_zilloft_3.py"
     }
   ],
   "points": 1,

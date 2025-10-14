@@ -1,21 +1,19 @@
 {
-  "id": "dashdish-1",
-  "goal": "What are the first three restaurants listed on the homepage?",
+  "id": "dashdish_1",
+  "goal": "DashDish: Its my son\u2019s birthday, please order me a Pizza from anywhere and keep it under $30",
   "website": {
     "id": "dashdish",
     "name": "DashDish",
-    "similarTo": "Doordash",
+    "similarTo": "DoorDash",
     "previewImage": "/websitePreviews/dashdish_preview.jpg",
-    "url": "https://evals-dashdish.vercel.app"
+    "url": "https://real-dashdish-1rmq4pjxg-real-sites.vercel.app"
   },
-  "difficulty": "easy",
-  "challengeType": "retrieval",
+  "difficulty": "medium",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer include \"Gambinos New York Subs\", \"Wingstop\", and \"Man vs Fries\" as the first three restaurants?"
+      "script": "eval_dashdish_1.py"
     }
   ],
   "points": 1,

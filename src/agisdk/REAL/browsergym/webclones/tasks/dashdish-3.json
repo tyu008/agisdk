@@ -1,21 +1,19 @@
 {
-  "id": "dashdish-3",
-  "goal": "How many restaurants in the \"Light & fresh\" category offer delivery?",
+  "id": "dashdish_3",
+  "goal": "Order me some noodles and make sure the final price is under 26$",
   "website": {
     "id": "dashdish",
     "name": "DashDish",
-    "similarTo": "Doordash",
+    "similarTo": "DoorDash",
     "previewImage": "/websitePreviews/dashdish_preview.jpg",
-    "url": "https://evals-dashdish.vercel.app"
+    "url": "https://real-dashdish-1rmq4pjxg-real-sites.vercel.app"
   },
   "difficulty": "medium",
-  "challengeType": "retrieval",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer indicate that 5 restaurants in the \"Light & fresh\" category offer delivery?"
+      "script": "eval_dashdish_3.py"
     }
   ],
   "points": 1,

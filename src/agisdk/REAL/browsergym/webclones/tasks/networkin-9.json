@@ -1,40 +1,19 @@
 {
-  "id": "networkin-9",
-  "goal": "Find a professional who attended Stanford and send them a connection request and a message.",
+  "id": "networkin_9",
+  "goal": "Invite someone working in the tech industry living in new york to join my new project.",
   "website": {
     "id": "networkin",
-    "name": "Networkin",
+    "name": "NetworkIn",
     "similarTo": "LinkedIn",
     "previewImage": "/websitePreviews/networkin_preview.jpg",
-    "url": "https://evals-networkin.vercel.app"
+    "url": "https://real-networkin-mtmzp58l6-real-sites.vercel.app"
   },
   "difficulty": "medium",
-  "challengeType": "retrieval-action",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "description": "performed a search for Stanford",
-      "type": "jmespath",
-      "expected_value": true,
-      "query": "contains(to_string(searchHistoryDiff.added), 'stanford')"
-    },
-    {
-      "description": "profile connection established",
-      "type": "jmespath",
-      "expected_value": true,
-      "query": "profilesDiff.updated != null && length(keys(profilesDiff.updated)) > `0`"
-    },
-    {
-      "description": "connection is 1st degree",
-      "type": "jmespath",
-      "expected_value": "1st",
-      "query": "values(profilesDiff.updated)[0].connectionGrade"
-    },
-    {
-      "description": "contact added to list",
-      "type": "jmespath",
-      "expected_value": true,
-      "query": "contactListDiff.added != null && length(keys(contactListDiff.added)) > `0`"
+      "script": "eval_networkin_9.py"
     }
   ],
   "points": 1,

@@ -1,27 +1,19 @@
 {
-  "id": "dashdish-9",
-  "goal": "Add a \"Large Classic Cheeseburger\" from \"RT Rotisserie\" to the cart, then remove it.",
+  "id": "dashdish_9",
+  "goal": "Order $20 worth of food from Taco Boys",
   "website": {
     "id": "dashdish",
     "name": "DashDish",
-    "similarTo": "Doordash",
+    "similarTo": "DoorDash",
     "previewImage": "/websitePreviews/dashdish_preview.jpg",
-    "url": "https://evals-dashdish.vercel.app"
+    "url": "https://real-dashdish-1rmq4pjxg-real-sites.vercel.app"
   },
-  "difficulty": "hard",
-  "challengeType": "retrieval-action",
+  "difficulty": "medium",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer confirm that the item was first added to the cart and then removed successfully?"
-    },
-    {
-      "description": "cart is empty",
-      "type": "jmespath",
-      "expected_value": 0,
-      "query": "length(differences.foodOrders.added)"
+      "script": "eval_dashdish_9.py"
     }
   ],
   "points": 1,

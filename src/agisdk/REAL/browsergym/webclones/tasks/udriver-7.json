@@ -1,21 +1,19 @@
 {
-  "id": "udriver-7",
-  "goal": "How many trips did I take in June?",
+  "id": "udriver_7",
+  "goal": "Reserve an uber for 7pm tonight from 77 Bluxome Apartments to Audio Nightclub. If I have enough credits, book the UdriverXL.",
   "website": {
     "id": "udriver",
     "name": "UDriver",
     "similarTo": "Uber",
     "previewImage": "/websitePreviews/udriver_preview.jpg",
-    "url": "https://evals-udriver.vercel.app"
+    "url": "https://real-udriver-3ufk0q1v4-real-sites.vercel.app"
   },
   "difficulty": "medium",
-  "challengeType": "retrieval-action",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer reflect that six rides were taken in June?"
+      "script": "eval_udriver_7.py"
     }
   ],
   "points": 1,

@@ -1,21 +1,19 @@
 {
-  "id": "staynb-3",
-  "goal": "How much more expensive is the most expensive stay compared to the cheapest one? Please provide just the dollar amount difference.",
+  "id": "staynb_3",
+  "goal": "Find me places in Cape Town for 4 guests for the dates October 1st to 6th. I need 2+ bedrooms and beds along with wifi. Add a place that fits these requirements to my wishlist.",
   "website": {
     "id": "staynb",
     "name": "StayNB",
     "similarTo": "Airbnb",
     "previewImage": "/websitePreviews/staynb_preview.jpg",
-    "url": "https://evals-staynb.vercel.app"
+    "url": "https://real-staynb-jbf17z6s2-real-sites.vercel.app"
   },
-  "difficulty": "easy",
-  "challengeType": "retrieval",
+  "difficulty": "medium",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer contain the price difference of $982?"
+      "script": "eval_staynb_3.py"
     }
   ],
   "points": 1,

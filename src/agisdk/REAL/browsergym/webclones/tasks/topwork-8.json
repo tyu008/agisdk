@@ -1,21 +1,19 @@
 {
-  "id": "topwork-8",
-  "goal": "What was the last message that you recieved?",
+  "id": "topwork_8",
+  "goal": "Rehire someone I've already hired as a project lead.",
   "website": {
     "id": "topwork",
     "name": "TopWork",
     "similarTo": "Upwork",
     "previewImage": "/websitePreviews/topwork_preview.jpg",
-    "url": "https://evals-topwork.vercel.app"
+    "url": "https://real-topwork-gi8kuj63p-real-sites.vercel.app"
   },
   "difficulty": "medium",
   "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer include information about the last message recieved?"
+      "script": "eval_topwork_8.py"
     }
   ],
   "points": 1,

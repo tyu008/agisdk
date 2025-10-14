@@ -1,21 +1,19 @@
 {
-  "id": "dashdish-8",
-  "goal": "What are first three categories of deliverable food displayed on the homepage?",
+  "id": "dashdish_8",
+  "goal": "DashDish: Place an order for any type of sub-sandwich, keep the total under $30",
   "website": {
     "id": "dashdish",
     "name": "DashDish",
-    "similarTo": "Doordash",
+    "similarTo": "DoorDash",
     "previewImage": "/websitePreviews/dashdish_preview.jpg",
-    "url": "https://evals-dashdish.vercel.app"
+    "url": "https://real-dashdish-1rmq4pjxg-real-sites.vercel.app"
   },
   "difficulty": "medium",
-  "challengeType": "retrieval",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer include \"Under $1 delivery fee\", \"Best of lunch\", and \"The Infatuation's picks\" as the top three categories?"
+      "script": "eval_dashdish_8.py"
     }
   ],
   "points": 1,

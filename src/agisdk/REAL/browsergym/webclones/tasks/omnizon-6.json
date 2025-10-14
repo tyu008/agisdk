@@ -1,38 +1,19 @@
 {
-  "id": "omnizon-6",
-  "goal": "Compare the specifications and price of the \"SAMSUNG Galaxy S24 Ultra\" and \"SAMSUNG Galaxy Z Fold 6,\" and buy the one with better features relative to its price, using the \"Buy Now\" button in the product details. Explain your choice.",
+  "id": "omnizon_6",
+  "goal": "Omnizon: Find me a nice toy for my 3 year old son which is between $15 and $50",
   "website": {
     "id": "omnizon",
     "name": "Omnizon",
     "similarTo": "Amazon",
     "previewImage": "/websitePreviews/omnizon_preview.jpg",
-    "url": "https://evals-omnizon.vercel.app"
+    "url": "https://real-omnizon-eq6za0727-real-sites.vercel.app"
   },
-  "difficulty": "hard",
-  "challengeType": "retrieval-action",
+  "difficulty": "medium",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "jmespath",
-      "expected_value": 1,
-      "query": "length(orderDetailsDiff.added.\"0\".order.cart)"
-    },
-    {
-      "type": "jmespath",
-      "description": "id match",
-      "expected_value": "22",
-      "query": "orderDetailsDiff.added.\"0\".order.cart[0].id"
-    },
-    {
-      "type": "jmespath",
-      "description": "1 of each product",
-      "expected_value": true,
-      "query": "length(orderDetailsDiff.added.\"0\".order.cart[?quantity != `1`]) == `0`"
-    },
-    {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer explain why the Samsung Galaxy S24 Ultra offers better features relative to its price compared to the Galaxy Z Fold 6, and confirm that it was purchased?"
+      "script": "eval_omnizon_6.py"
     }
   ],
   "points": 1,

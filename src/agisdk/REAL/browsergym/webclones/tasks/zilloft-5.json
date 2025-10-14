@@ -1,22 +1,19 @@
 {
-  "id": "zilloft-5",
-  "goal": "Filter the listings in San Jose to display only \"Townhomes\" within a price range of $750,000 to $1,000,000. How many results are displayed?",
+  "id": "zilloft_5",
+  "goal": "Request a tour for a house for July 19th around the Los Angeles area that are under 350,000$ and have 2+ bedrooms and 1+ bathrooms.",
   "website": {
     "id": "zilloft",
-    "name": "Zilloft",
+    "name": "ZilloFT",
     "similarTo": "Zillow",
     "previewImage": "/websitePreviews/zilloft_preview.jpg",
-    "url": "https://evals-zilloft.vercel.app"
+    "url": "https://real-zilloft-46k595h3n-real-sites.vercel.app"
   },
   "difficulty": "medium",
   "challengeType": "action",
   "possible": true,
-  "description": "eval not implemented yet",
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer correctly state that there is 1 result displayed when filtering for Townhomes within a price range of $750,000 to $1,000,000?"
+      "script": "eval_zilloft_5.py"
     }
   ],
   "points": 1,

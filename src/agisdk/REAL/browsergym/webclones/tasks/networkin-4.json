@@ -1,22 +1,19 @@
 {
-  "id": "networkin-4",
-  "goal": "List the top 5 most recently shared posts on the homepage.",
+  "id": "networkin_4",
+  "goal": "Connect with at least 2 engineers that I have not connected with before.",
   "website": {
     "id": "networkin",
-    "name": "Networkin",
+    "name": "NetworkIn",
     "similarTo": "LinkedIn",
     "previewImage": "/websitePreviews/networkin_preview.jpg",
-    "url": "https://evals-networkin.vercel.app"
+    "url": "https://real-networkin-mtmzp58l6-real-sites.vercel.app"
   },
   "difficulty": "medium",
-  "challengeType": "retrieval",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "possible": true,
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "The answer should contain a list of the 5 most recent posts from the homepage feed."
+      "script": "eval_networkin_4.py"
     }
   ],
   "points": 1,

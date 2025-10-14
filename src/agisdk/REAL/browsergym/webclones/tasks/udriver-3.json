@@ -1,22 +1,19 @@
 {
-  "id": "udriver-3",
-  "goal": "What's the cheapest ride price from Pacific Catch on Chestnut back home to 333 Fremont?",
+  "id": "udriver_3",
+  "goal": "Book me a ride from Alchemist Bar and Lounge to El Corazon Gallery.",
   "website": {
     "id": "udriver",
     "name": "UDriver",
     "similarTo": "Uber",
     "previewImage": "/websitePreviews/udriver_preview.jpg",
-    "url": "https://evals-udriver.vercel.app"
+    "url": "https://real-udriver-3ufk0q1v4-real-sites.vercel.app"
   },
-  "difficulty": "easy",
-  "challengeType": "retrieval-action",
+  "difficulty": "medium",
+  "challengeType": "action",
   "possible": true,
-  "description": "eval not implemented yet",
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer reflect that the cheapest ride price is equivalant to $28.50?"
+      "script": "eval_udriver_3.py"
     }
   ],
   "points": 1,

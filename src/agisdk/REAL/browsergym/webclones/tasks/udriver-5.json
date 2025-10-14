@@ -1,39 +1,19 @@
 {
-  "id": "udriver-5",
-  "goal": "Book a UdriverX ride leaving now from 333 Fremont to Fitness SF in the Castro and tell me the license plate of the driver once booked.",
+  "id": "udriver_5",
+  "goal": "I want to book a a UdriverXL ride from 1 Hotel San Francisco to 1030 Post Street Apartments picking me up now using cash.",
   "website": {
     "id": "udriver",
     "name": "UDriver",
     "similarTo": "Uber",
     "previewImage": "/websitePreviews/udriver_preview.jpg",
-    "url": "https://evals-udriver.vercel.app"
+    "url": "https://real-udriver-3ufk0q1v4-real-sites.vercel.app"
   },
   "difficulty": "medium",
-  "challengeType": "retrieval-action",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "description": "correct pickup location",
-      "type": "jmespath",
-      "expected_value": "333 Fremont Apartments",
-      "query": "differences.currentTrips.added.\"6\".pickup.name"
-    },
-    {
-      "description": "correct destination",
-      "type": "jmespath",
-      "expected_value": "FITNESS SF - Castro",
-      "query": "differences.currentTrips.added.\"6\".destination.name"
-    },
-    {
-      "description": "correct car type",
-      "type": "jmespath",
-      "expected_value": "UdriverX",
-      "query": "differences.currentTrips.added.\"6\".car.type"
-    },
-    {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer reflect a license plate of \"DLOD90\"?"
+      "script": "eval_udriver_5.py"
     }
   ],
   "points": 1,

@@ -1,21 +1,19 @@
 {
-  "id": "omnizon-1",
-  "goal": "Search for \"laptop\" using the search bar and display the first product in the results.",
+  "id": "omnizon_1",
+  "goal": "I just remembered I have to cancel my last 2 orders, can you go ahead and do that.",
   "website": {
     "id": "omnizon",
     "name": "Omnizon",
     "similarTo": "Amazon",
     "previewImage": "/websitePreviews/omnizon_preview.jpg",
-    "url": "https://evals-omnizon.vercel.app"
+    "url": "https://real-omnizon-eq6za0727-real-sites.vercel.app"
   },
-  "difficulty": "easy",
+  "difficulty": "medium",
   "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer mention or describe the first product (VILVA Portable-Monitor-for-Laptop) that appears in the search results for 'laptop'?"
+      "script": "eval_omnizon_1.py"
     }
   ],
   "points": 1,

@@ -1,21 +1,19 @@
 {
-  "id": "zilloft-7",
-  "goal": "How many \"Manufactured\" homes are available in San Francisco under $1,000,000?",
+  "id": "zilloft_7",
+  "goal": "Save me a couple homes that are max 900k with 3+ bedrooms and 2+ bathrooms in Charlotte, NC.",
   "website": {
     "id": "zilloft",
-    "name": "Zilloft",
+    "name": "ZilloFT",
     "similarTo": "Zillow",
     "previewImage": "/websitePreviews/zilloft_preview.jpg",
-    "url": "https://evals-zilloft.vercel.app"
+    "url": "https://real-zilloft-46k595h3n-real-sites.vercel.app"
   },
   "difficulty": "medium",
-  "challengeType": "retrieval",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer correctly state that there are 24 \"Manufactured\" homes available in San Francisco under $1,000,000?"
+      "script": "eval_zilloft_7.py"
     }
   ],
   "points": 1,

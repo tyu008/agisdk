@@ -1,22 +1,19 @@
 {
-  "id": "networkin-2",
-  "goal": "Summarize the last five posts on the homepage feed, providing a brief description of each and identifying any recurring themes.",
+  "id": "networkin_2",
+  "goal": "Add me to around 4 groups in my recommended.",
   "website": {
     "id": "networkin",
-    "name": "Networkin",
+    "name": "NetworkIn",
     "similarTo": "LinkedIn",
     "previewImage": "/websitePreviews/networkin_preview.jpg",
-    "url": "https://evals-networkin.vercel.app"
+    "url": "https://real-networkin-mtmzp58l6-real-sites.vercel.app"
   },
   "difficulty": "medium",
-  "challengeType": "retrieval",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "possible": true,
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "The answer should be a summary of the 5 most recent posts, containing descriptions of each post and identifying recurring themes."
+      "script": "eval_networkin_2.py"
     }
   ],
   "points": 1,

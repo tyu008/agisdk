@@ -1,22 +1,19 @@
 {
-  "id": "zilloft-4",
-  "goal": "What is the price of the cheapest home in San Francisco with at least 4 bedrooms?",
+  "id": "zilloft_4",
+  "goal": "Request a tour for a 3 bed 2 bath house in long beach.",
   "website": {
     "id": "zilloft",
-    "name": "Zilloft",
+    "name": "ZilloFT",
     "similarTo": "Zillow",
     "previewImage": "/websitePreviews/zilloft_preview.jpg",
-    "url": "https://evals-zilloft.vercel.app"
+    "url": "https://real-zilloft-46k595h3n-real-sites.vercel.app"
   },
   "difficulty": "medium",
-  "challengeType": "retrieval",
+  "challengeType": "action",
   "possible": true,
-  "description": "eval not implemented yet",
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the answer correctly state that the price of the cheapest home in San Francisco with at least 4 bedrooms is $449,900?"
+      "script": "eval_zilloft_4.py"
     }
   ],
   "points": 1,

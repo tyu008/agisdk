@@ -1,21 +1,19 @@
 {
-  "id": "opendining-6",
-  "goal": "Select any restaurant and try finishing the booking with the phone number \"+1 1111\". Report whether the booking was successful or if there was an error.",
+  "id": "opendining_6",
+  "goal": "OpenDining: Reserve me a restaurant for 1:30 today, July 18th.",
   "website": {
     "id": "opendining",
     "name": "OpenDining",
     "similarTo": "OpenTable",
     "previewImage": "/websitePreviews/opendining_preview.jpg",
-    "url": "https://evals-opendining.vercel.app"
+    "url": "https://real-opendining-fdcw98zrb-real-sites.vercel.app"
   },
-  "difficulty": "easy",
-  "challengeType": "retrieval-action",
+  "difficulty": "medium",
+  "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "type": "llm_boolean",
-      "expected_value": true,
-      "rubric": "Does the response indicate that the booking failed or there was a validation error due to the invalid phone number format '+1 1111'?"
+      "script": "eval_opendining_6.py"
     }
   ],
   "points": 1,
