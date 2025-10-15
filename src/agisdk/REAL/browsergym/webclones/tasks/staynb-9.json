@@ -1,19 +1,28 @@
 {
-  "id": "staynb_9",
-  "goal": "book a stay in los angeles with wifi under 600$ nightly for the dates september 1st to 3rd.",
+  "id": "staynb-9",
+  "goal": "Book a stay with the maximum number of guests supported. For fields you don't know the answer for, just fill them in with anything of your choice.",
   "website": {
     "id": "staynb",
     "name": "StayNB",
     "similarTo": "Airbnb",
     "previewImage": "/websitePreviews/staynb_preview.jpg",
-    "url": "https://real-staynb-jbf17z6s2-real-sites.vercel.app"
+    "url": "https://evals-staynb.vercel.app"
   },
-  "difficulty": "medium",
+  "difficulty": "hard",
   "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "script": "eval_staynb_9.py"
+      "description": "booking was made",
+      "type": "jmespath",
+      "expected_value": true,
+      "query": "bookingDetailsDiff.added.\"0\" != null"
+    },
+    {
+      "description": "correct guest information",
+      "type": "jmespath",
+      "expected_value": "32 Guests, 16 Infants",
+      "query": "bookingDetailsDiff.added.\"0\".guests"
     }
   ],
   "points": 1,

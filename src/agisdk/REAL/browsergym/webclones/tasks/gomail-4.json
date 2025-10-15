@@ -1,19 +1,22 @@
 {
-  "id": "gomail_4",
-  "goal": "Go Mail: Email Charles to see if he has found any new clients",
+  "id": "gomail-4",
+  "goal": "How many emails are in the \"Starred\" category?",
   "website": {
     "id": "gomail",
     "name": "GoMail",
     "similarTo": "Gmail",
     "previewImage": "/websitePreviews/gomail_preview.jpg",
-    "url": "https://real-gomail-1glk4rtaf-real-sites.vercel.app"
+    "url": "https://evals-gomail.vercel.app"
   },
   "difficulty": "medium",
-  "challengeType": "action",
+  "challengeType": "retrieval",
   "possible": true,
   "evals": [
     {
-      "script": "eval_gomail_4.py"
+      "possible": true,
+      "type": "llm_boolean",
+      "expected_value": true,
+      "rubric": "Does the answer reflect that there are 13 emails in the \"Starred\" category?"
     }
   ],
   "points": 1,

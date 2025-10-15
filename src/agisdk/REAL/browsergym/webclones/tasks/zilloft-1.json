@@ -1,19 +1,21 @@
 {
-  "id": "zilloft_1",
-  "goal": "Contact an agent for a house in Sacramento that is in the price range 500k - 1.1M. It needs to be 4+ bedrooms and 2+ bathrooms. Have the house tour on July 19th around 1pmish.",
+  "id": "zilloft-1",
+  "goal": "Search for homes in San Francisco with a price range of $500,000 to $750,000. How many listings are displayed?",
   "website": {
     "id": "zilloft",
-    "name": "ZilloFT",
+    "name": "Zilloft",
     "similarTo": "Zillow",
     "previewImage": "/websitePreviews/zilloft_preview.jpg",
-    "url": "https://real-zilloft-46k595h3n-real-sites.vercel.app"
+    "url": "https://evals-zilloft.vercel.app"
   },
-  "difficulty": "medium",
-  "challengeType": "action",
+  "difficulty": "easy",
+  "challengeType": "retrieval",
   "possible": true,
   "evals": [
     {
-      "script": "eval_zilloft_1.py"
+      "type": "llm_boolean",
+      "expected_value": true,
+      "rubric": "Does the answer correctly state that there are 8 listings displayed for homes in San Francisco with a price range of $500,000 to $750,000?"
     }
   ],
   "points": 1,

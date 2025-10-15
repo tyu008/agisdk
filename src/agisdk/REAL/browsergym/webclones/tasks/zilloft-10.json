@@ -1,19 +1,21 @@
 {
-  "id": "zilloft_10",
-  "goal": "Show me townhomes in Denver for rent.",
+  "id": "zilloft-10",
+  "goal": "How many \"Houses\" and \"Townhomes\" are listed in San Francisco with a price below $500,000?",
   "website": {
     "id": "zilloft",
-    "name": "ZilloFT",
+    "name": "Zilloft",
     "similarTo": "Zillow",
     "previewImage": "/websitePreviews/zilloft_preview.jpg",
-    "url": "https://real-zilloft-46k595h3n-real-sites.vercel.app"
+    "url": "https://evals-zilloft.vercel.app"
   },
-  "difficulty": "medium",
-  "challengeType": "action",
+  "difficulty": "hard",
+  "challengeType": "retrieval",
   "possible": true,
   "evals": [
     {
-      "script": "eval_zilloft_10.py"
+      "type": "llm_boolean",
+      "expected_value": true,
+      "rubric": "Does the answer correctly state that there are 13 \"Houses\" and \"Townhomes\" listed in San Francisco with a price below $500,000?"
     }
   ],
   "points": 1,

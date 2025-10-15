@@ -1,19 +1,34 @@
 {
-  "id": "omnizon_8",
-  "goal": "Omnizon: I want to create a gaming collection - buy any gaming device under $100",
+  "id": "omnizon-8",
+  "goal": "Search for \"Automatic Espresso Machine,\" click on the cheapest one, change the quantity to 5, use \"buy now\" to purchase them and complete the checkout.",
   "website": {
     "id": "omnizon",
     "name": "Omnizon",
     "similarTo": "Amazon",
     "previewImage": "/websitePreviews/omnizon_preview.jpg",
-    "url": "https://real-omnizon-eq6za0727-real-sites.vercel.app"
+    "url": "https://evals-omnizon.vercel.app"
   },
-  "difficulty": "medium",
-  "challengeType": "action",
+  "difficulty": "easy",
+  "challengeType": "retrieval-action",
   "possible": true,
   "evals": [
     {
-      "script": "eval_omnizon_8.py"
+      "description": "quantity of 5",
+      "type": "jmespath",
+      "expected_value": 5,
+      "query": "orderDetailsDiff.added.\"0\".order.cart[0].quantity"
+    },
+    {
+      "type": "jmespath",
+      "description": "id match",
+      "expected_value": "51",
+      "query": "orderDetailsDiff.added.\"0\".order.cart[0].id"
+    },
+    {
+      "type": "jmespath",
+      "description": "1 product in cart",
+      "expected_value": 1,
+      "query": "length(orderDetailsDiff.added.\"0\".order.cart)"
     }
   ],
   "points": 1,

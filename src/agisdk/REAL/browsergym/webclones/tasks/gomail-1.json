@@ -1,19 +1,22 @@
 {
-  "id": "gomail_1",
-  "goal": "Mark all my emails as read and delete all amazon related emails.",
+  "id": "gomail-1",
+  "goal": "How many unread emails are in the Inbox?",
   "website": {
     "id": "gomail",
     "name": "GoMail",
     "similarTo": "Gmail",
     "previewImage": "/websitePreviews/gomail_preview.jpg",
-    "url": "https://real-gomail-1glk4rtaf-real-sites.vercel.app"
+    "url": "https://evals-gomail.vercel.app"
   },
-  "difficulty": "medium",
-  "challengeType": "action",
+  "difficulty": "easy",
+  "challengeType": "retrieval",
   "possible": true,
   "evals": [
     {
-      "script": "eval_gomail_1.py"
+      "possible": true,
+      "type": "llm_boolean",
+      "expected_value": true,
+      "rubric": "Does the answer reflect that there are 17 unread emails in the Inbox?"
     }
   ],
   "points": 1,

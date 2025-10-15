@@ -1,19 +1,21 @@
 {
-  "id": "topwork_6",
-  "goal": "Invite a full-stack developer to a job.",
+  "id": "topwork-6",
+  "goal": "Find Ashley C. and tell me what her last completed project was.",
   "website": {
     "id": "topwork",
     "name": "TopWork",
     "similarTo": "Upwork",
     "previewImage": "/websitePreviews/topwork_preview.jpg",
-    "url": "https://real-topwork-gi8kuj63p-real-sites.vercel.app"
+    "url": "https://evals-topwork.vercel.app"
   },
   "difficulty": "medium",
   "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "script": "eval_topwork_6.py"
+      "type": "llm_boolean",
+      "expected_value": true,
+      "rubric": "Does the answer mention that Ashley C's last project was Backend Developer for Social Media Platform?"
     }
   ],
   "points": 1,

@@ -1,19 +1,34 @@
 {
-  "id": "networkin_6",
-  "goal": "Create a post talking about my networking event and tell everyone to dm me if interested. Then send the post to a couple people I have connected.",
+  "id": "networkin-6",
+  "goal": "Choose a random person who you haven't connected with, connect with them, and send them a message saying, 'howdy, partner'.",
   "website": {
     "id": "networkin",
-    "name": "NetworkIn",
+    "name": "Networkin",
     "similarTo": "LinkedIn",
     "previewImage": "/websitePreviews/networkin_preview.jpg",
-    "url": "https://real-networkin-mtmzp58l6-real-sites.vercel.app"
+    "url": "https://evals-networkin.vercel.app"
   },
   "difficulty": "medium",
   "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "script": "eval_networkin_6.py"
+      "description": "connection established",
+      "type": "jmespath",
+      "expected_value": "1st",
+      "query": "profilesDiff.updated.\"4\".connectionGrade"
+    },
+    {
+      "description": "message sent",
+      "type": "jmespath",
+      "expected_value": true,
+      "query": "contactListDiff.added != null && length(keys(contactListDiff.added)) > `0`"
+    },
+    {
+      "description": "correct message content",
+      "type": "jmespath",
+      "expected_value": "howdy, partner",
+      "query": "contactListDiff.added.\"1\".lastMessage"
     }
   ],
   "points": 1,

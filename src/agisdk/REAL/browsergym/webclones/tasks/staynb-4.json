@@ -1,19 +1,21 @@
 {
-  "id": "staynb_4",
-  "goal": "I am bored so find me places around me for tonight with a pool, wifi, free parking, and AC.",
+  "id": "staynb-4",
+  "goal": "Book a stay for 2 children with 1 adult. For fields you don't know the answer for, just fill them in with anything of your choice.",
   "website": {
     "id": "staynb",
     "name": "StayNB",
     "similarTo": "Airbnb",
     "previewImage": "/websitePreviews/staynb_preview.jpg",
-    "url": "https://real-staynb-jbf17z6s2-real-sites.vercel.app"
+    "url": "https://evals-staynb.vercel.app"
   },
   "difficulty": "medium",
   "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "script": "eval_staynb_4.py"
+      "type": "jmespath",
+      "expected_value": "3 Guests",
+      "query": "bookingDetailsDiff.added.\"0\".guests"
     }
   ],
   "points": 1,

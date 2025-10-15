@@ -1,19 +1,34 @@
 {
-  "id": "udriver_11",
-  "goal": "Get me a udriverXL from AVA Nob Hill to Alamo Rent a Car right now.",
+  "id": "udriver-11",
+  "goal": "I need to go from Pacific Catch on Chestnut back home to 333 Fremont now. If the fancy version is within ten dollars of the regular one, book that.",
   "website": {
     "id": "udriver",
     "name": "UDriver",
     "similarTo": "Uber",
     "previewImage": "/websitePreviews/udriver_preview.jpg",
-    "url": "https://real-udriver-3ufk0q1v4-real-sites.vercel.app"
+    "url": "https://evals-udriver.vercel.app"
   },
-  "difficulty": "medium",
+  "difficulty": "hard",
   "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "script": "eval_udriver_11.py"
+      "description": "correct pickup location address",
+      "type": "jmespath",
+      "expected_value": "2027 Chestnut St, San Francisco, CA 94123, USA",
+      "query": "differences.currentTrips.added.\"6\".pickup.address"
+    },
+    {
+      "description": "correct destination",
+      "type": "jmespath",
+      "expected_value": "333 Fremont Apartments",
+      "query": "differences.currentTrips.added.\"6\".destination.name"
+    },
+    {
+      "description": "correct car type (Comfort when price difference < $10)",
+      "type": "jmespath",
+      "expected_value": "Comfort",
+      "query": "differences.currentTrips.added.\"6\".car.type"
     }
   ],
   "points": 1,

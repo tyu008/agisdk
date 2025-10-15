@@ -1,19 +1,21 @@
 {
-  "id": "omnizon_7",
-  "goal": "Omnizon: I need to cook for my friends party, order me a nice cooking pot",
+  "id": "omnizon-7",
+  "goal": "Go to the \"Gaming\" category from the homepage and identify the most expensive product.",
   "website": {
     "id": "omnizon",
     "name": "Omnizon",
     "similarTo": "Amazon",
     "previewImage": "/websitePreviews/omnizon_preview.jpg",
-    "url": "https://real-omnizon-eq6za0727-real-sites.vercel.app"
+    "url": "https://evals-omnizon.vercel.app"
   },
   "difficulty": "medium",
   "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "script": "eval_omnizon_7.py"
+      "type": "llm_boolean",
+      "expected_value": true,
+      "rubric": "Does the answer identify the SAMSUNG Galaxy Z Fold as the most expensive product in the Gaming category?"
     }
   ],
   "points": 1,

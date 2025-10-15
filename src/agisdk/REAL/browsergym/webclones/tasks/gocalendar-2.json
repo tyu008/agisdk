@@ -1,19 +1,21 @@
 {
-  "id": "gocalendar_2",
-  "goal": "Calendar: My friends just told me they are not free for dinner anymore, cancel that plan on Wednesday",
+  "id": "gocalendar-2",
+  "goal": "Switch to the \"Month\" view and list all events displayed for July 2024",
   "website": {
     "id": "gocalendar",
     "name": "GoCalendar",
     "similarTo": "Google Calendar",
     "previewImage": "/websitePreviews/gocalendar_preview.jpg",
-    "url": "https://real-gocalendar-n1nw9ran1-real-sites.vercel.app"
+    "url": "https://evals-gocalendar.vercel.app"
   },
-  "difficulty": "medium",
+  "difficulty": "easy",
   "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "script": "eval_gocalendar_2.py"
+      "type": "llm_boolean",
+      "expected_value": true,
+      "rubric": "Does the answer accurately list all events displayed for July 2024 including Team Standup Meeting, Client Call, Team Brainstorming Session, Morning Walk, Team Workshop, Lunch with Boss, Project Sync, Customer Feedback Session, Team Collaboration Work, Morning Coffee with sister, Team Check-In, Lunch with Marketing Team, Breakfast Metting with Client, Team Progress Check, and Client Presentation?"
     }
   ],
   "points": 1,

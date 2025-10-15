@@ -1,19 +1,26 @@
 {
-  "id": "gocalendar_6",
-  "goal": "Go Calendar: Add an event for Monday morning: reminding I need to buy gym clothes",
+  "id": "gocalendar-6",
+  "goal": "Assign a sage color code to the \"Personal\" calendar and a peacock color code to the \"Work\" calendar",
   "website": {
     "id": "gocalendar",
     "name": "GoCalendar",
     "similarTo": "Google Calendar",
     "previewImage": "/websitePreviews/gocalendar_preview.jpg",
-    "url": "https://real-gocalendar-n1nw9ran1-real-sites.vercel.app"
+    "url": "https://evals-gocalendar.vercel.app"
   },
-  "difficulty": "medium",
+  "difficulty": "easy",
   "challengeType": "action",
   "possible": true,
   "evals": [
     {
-      "script": "eval_gocalendar_6.py"
+      "type": "llm_boolean",
+      "expected_value": true,
+      "rubric": "Has the 'Personal' calendar been changed to a sage color?"
+    },
+    {
+      "type": "llm_boolean",
+      "expected_value": true,
+      "rubric": "Has the 'Work' calendar been changed to a peacock color?"
     }
   ],
   "points": 1,
