@@ -1,5 +1,5 @@
 {
-  "id": "dashdish_10",
+  "id": "dashdish-10",
   "goal": "Order lemon pepper wings from Wingstop",
   "website": {
     "id": "dashdish",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

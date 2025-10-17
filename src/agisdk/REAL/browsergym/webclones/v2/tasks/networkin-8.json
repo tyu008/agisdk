@@ -1,5 +1,5 @@
 {
-  "id": "networkin_8",
+  "id": "networkin-8",
   "goal": "Follow some popular companies and also make sure to follow Microsoft.",
   "website": {
     "id": "networkin",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

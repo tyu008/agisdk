@@ -1,5 +1,5 @@
 {
-  "id": "dashdish_3",
+  "id": "dashdish-3",
   "goal": "Order me some noodles and make sure the final price is under 26$",
   "website": {
     "id": "dashdish",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

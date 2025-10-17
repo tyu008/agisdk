@@ -1,5 +1,5 @@
 {
-  "id": "networkin_5",
+  "id": "networkin-5",
   "goal": "Connect with at least 5 people and like 3 random posts.",
   "website": {
     "id": "networkin",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

@@ -1,5 +1,5 @@
 {
-  "id": "topwork_12",
+  "id": "topwork-12",
   "goal": "Topwork: Hire a potential candidate and send them a valid message with the offer",
   "website": {
     "id": "topwork",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

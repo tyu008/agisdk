@@ -1,5 +1,5 @@
 {
-  "id": "omnizon_9",
+  "id": "omnizon-9",
   "goal": "Omnizon: Order me a desk chair for my new desk",
   "website": {
     "id": "omnizon",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

@@ -1,5 +1,5 @@
 {
-  "id": "opendining_7",
+  "id": "opendining-7",
   "goal": "OpenDining: Reserve me a restaurant for breakfast today between 7am - 10am, make sure it is at least 3 stars",
   "website": {
     "id": "opendining",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

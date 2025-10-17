@@ -1,5 +1,5 @@
 {
-  "id": "gomail_15",
+  "id": "gomail-15",
   "goal": "Clear all no reply emails.",
   "website": {
     "id": "gomail",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

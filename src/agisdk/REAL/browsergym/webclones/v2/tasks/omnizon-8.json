@@ -1,5 +1,5 @@
 {
-  "id": "omnizon_8",
+  "id": "omnizon-8",
   "goal": "Omnizon: I want to create a gaming collection - buy any gaming device under $100",
   "website": {
     "id": "omnizon",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

@@ -1,5 +1,5 @@
 {
-  "id": "networkin_7",
+  "id": "networkin-7",
   "goal": "Find a software engineer I have connected with or not, and ask them if they are interested in working on a side project.",
   "website": {
     "id": "networkin",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

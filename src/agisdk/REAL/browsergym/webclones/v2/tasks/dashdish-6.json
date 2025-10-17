@@ -1,5 +1,5 @@
 {
-  "id": "dashdish_6",
+  "id": "dashdish-6",
   "goal": "DashDish: Order me fries from anywhere and keep the total under $15",
   "website": {
     "id": "dashdish",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

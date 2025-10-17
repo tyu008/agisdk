@@ -1,5 +1,5 @@
 {
-  "id": "gocalendar_11",
+  "id": "gocalendar-11",
   "goal": "I have math camp July 21st to 27th all day. Create a reminder and the camp is in Sunnyvale btw.",
   "website": {
     "id": "gocalendar",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

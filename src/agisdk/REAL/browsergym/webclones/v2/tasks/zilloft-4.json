@@ -1,5 +1,5 @@
 {
-  "id": "zilloft_4",
+  "id": "zilloft-4",
   "goal": "Request a tour for a 3 bed 2 bath house in long beach.",
   "website": {
     "id": "zilloft",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

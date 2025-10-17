@@ -1,5 +1,5 @@
 {
-  "id": "omnizon_10",
+  "id": "omnizon-10",
   "goal": "Order headphones less than $100",
   "website": {
     "id": "omnizon",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

@@ -1,5 +1,5 @@
 {
-  "id": "gomail_16",
+  "id": "gomail-16",
   "goal": "GoMail: Delete all emails from John Doe",
   "website": {
     "id": "gomail",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

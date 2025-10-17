@@ -1,5 +1,5 @@
 {
-  "id": "gomail_9",
+  "id": "gomail-9",
   "goal": "GoMail: Send an email to Carol notifying her there has been a time change for the meeting and it is now moved to 8:30 AM",
   "website": {
     "id": "gomail",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

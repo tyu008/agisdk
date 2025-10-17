@@ -1,5 +1,5 @@
 {
-  "id": "opendining_1",
+  "id": "opendining-1",
   "goal": "Book me a 4+ star restaurant for my birthday tonight. It is going to be for my girlfriend and I.",
   "website": {
     "id": "opendining",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

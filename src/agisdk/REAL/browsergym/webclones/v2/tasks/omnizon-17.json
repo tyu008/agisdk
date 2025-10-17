@@ -1,5 +1,5 @@
 {
-  "id": "omnizon_17",
+  "id": "omnizon-17",
   "goal": "Order me 2 speakers under 50$ each.",
   "website": {
     "id": "omnizon",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

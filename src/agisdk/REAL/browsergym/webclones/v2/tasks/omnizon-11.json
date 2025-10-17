@@ -1,5 +1,5 @@
 {
-  "id": "omnizon_11",
+  "id": "omnizon-11",
   "goal": "Order me 2 of the same monitor, make sure to look for one that is 27in.",
   "website": {
     "id": "omnizon",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

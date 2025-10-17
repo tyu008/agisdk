@@ -1,5 +1,5 @@
 {
-  "id": "topwork_16",
+  "id": "topwork-16",
   "goal": "I need a entry level personal assistant for my huge project upcoming. I will pay 30-35$ and this project will be longer than 6 months. I might consider hiring full time.",
   "website": {
     "id": "topwork",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

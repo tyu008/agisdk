@@ -1,5 +1,5 @@
 {
-  "id": "omnizon_21",
+  "id": "omnizon-21",
   "goal": "Omnizon: Buy me a queen size bed frame",
   "website": {
     "id": "omnizon",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

@@ -1,5 +1,5 @@
 {
-  "id": "opendining_4",
+  "id": "opendining-4",
   "goal": "OpenDining: Book me a reservation for 1 person at Sushi Zen 12 pm for my lunch today",
   "website": {
     "id": "opendining",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

@@ -1,5 +1,5 @@
 {
-  "id": "udriver_10",
+  "id": "udriver-10",
   "goal": "Find me and book a ride from 1 Hotel San Francisco to 100 Van Ness Ave, San Francisco.",
   "website": {
     "id": "udriver",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

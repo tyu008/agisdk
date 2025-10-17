@@ -1,5 +1,5 @@
 {
-  "id": "topwork_6",
+  "id": "topwork-6",
   "goal": "Invite a full-stack developer to a job.",
   "website": {
     "id": "topwork",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

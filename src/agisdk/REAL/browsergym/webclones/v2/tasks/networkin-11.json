@@ -1,5 +1,5 @@
 {
-  "id": "networkin_11",
+  "id": "networkin-11",
   "goal": "Network In: Make a post about your summer internship",
   "website": {
     "id": "networkin",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

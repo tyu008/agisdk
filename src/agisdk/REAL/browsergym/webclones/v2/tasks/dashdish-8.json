@@ -1,5 +1,5 @@
 {
-  "id": "dashdish_8",
+  "id": "dashdish-8",
   "goal": "DashDish: Place an order for any type of sub-sandwich, keep the total under $30",
   "website": {
     "id": "dashdish",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

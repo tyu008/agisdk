@@ -1,5 +1,5 @@
 {
-  "id": "udriver_11",
+  "id": "udriver-11",
   "goal": "Get me a udriverXL from AVA Nob Hill to Alamo Rent a Car right now.",
   "website": {
     "id": "udriver",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

@@ -1,5 +1,5 @@
 {
-  "id": "omnizon_5",
+  "id": "omnizon-5",
   "goal": "Omnizon: Find me a coffee maker for under $100",
   "website": {
     "id": "omnizon",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

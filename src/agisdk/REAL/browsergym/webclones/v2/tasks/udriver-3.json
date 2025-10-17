@@ -1,5 +1,5 @@
 {
-  "id": "udriver_3",
+  "id": "udriver-3",
   "goal": "Book me a ride from Alchemist Bar and Lounge to El Corazon Gallery.",
   "website": {
     "id": "udriver",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

@@ -1,5 +1,5 @@
 {
-  "id": "topwork_4",
+  "id": "topwork-4",
   "goal": "I need a data annotator for my company, Verita AI. It is a small job and is not permanent. Pay is 20-25 an hour. Create a job posting.",
   "website": {
     "id": "topwork",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

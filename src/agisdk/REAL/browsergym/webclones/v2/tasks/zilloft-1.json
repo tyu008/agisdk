@@ -1,5 +1,5 @@
 {
-  "id": "zilloft_1",
+  "id": "zilloft-1",
   "goal": "Contact an agent for a house in Sacramento that is in the price range 500k - 1.1M. It needs to be 4+ bedrooms and 2+ bathrooms. Have the house tour on July 19th around 1pmish.",
   "website": {
     "id": "zilloft",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

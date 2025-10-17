@@ -1,5 +1,5 @@
 {
-  "id": "topwork_11",
+  "id": "topwork-11",
   "goal": "TopWork: Respond to Alex Rodriguez saying that I am open to help her get set up",
   "website": {
     "id": "topwork",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

@@ -1,5 +1,5 @@
 {
-  "id": "dashdish_19",
+  "id": "dashdish-19",
   "goal": "Order me 2 types of chicken curry from a indian restaurant. Need express delivery.",
   "website": {
     "id": "dashdish",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

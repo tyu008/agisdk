@@ -1,5 +1,5 @@
 {
-  "id": "networkin_17",
+  "id": "networkin-17",
   "goal": "Post that I finished my internship at AGI INC.",
   "website": {
     "id": "networkin",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

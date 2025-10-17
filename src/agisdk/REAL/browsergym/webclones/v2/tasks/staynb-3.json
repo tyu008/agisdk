@@ -1,5 +1,5 @@
 {
-  "id": "staynb_3",
+  "id": "staynb-3",
   "goal": "Find me places in Cape Town for 4 guests for the dates October 1st to 6th. I need 2+ bedrooms and beds along with wifi. Add a place that fits these requirements to my wishlist.",
   "website": {
     "id": "staynb",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

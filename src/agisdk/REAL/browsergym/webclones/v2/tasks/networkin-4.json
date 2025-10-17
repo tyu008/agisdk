@@ -1,5 +1,5 @@
 {
-  "id": "networkin_4",
+  "id": "networkin-4",
   "goal": "Connect with at least 2 engineers that I have not connected with before.",
   "website": {
     "id": "networkin",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

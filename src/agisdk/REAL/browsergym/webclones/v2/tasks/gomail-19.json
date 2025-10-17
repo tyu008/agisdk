@@ -1,5 +1,5 @@
 {
-  "id": "gomail_19",
+  "id": "gomail-19",
   "goal": "Go Mail: Write an email to Thompson regarding meeting date",
   "website": {
     "id": "gomail",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }
