@@ -14,8 +14,8 @@ submit_to_leaderboard = (
 
 harness = REAL.harness(
     model="gpt-5",
-    task_version="v1",
-    task_name="omnizon-1",
+    task_version="v2",
+    task_name="omnizon-2",
     headless=False,
     leaderboard=submit_to_leaderboard,
     run_id=RUN_ID if submit_to_leaderboard else None,

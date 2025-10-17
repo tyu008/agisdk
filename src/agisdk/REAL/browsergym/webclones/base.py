@@ -14,17 +14,19 @@ from agisdk.REAL.browsergym.webclones.task_config import (
 from agisdk.REAL.browsergym.webclones.evaluate import WebCloneEvaluator
 from agisdk.REAL.logging import logger as rich_logger
 
+RAILWAY_API_BASE = "https://evaluate-production.up.railway.app/"
+
 logger = logging.getLogger(__name__)
 
 def get_run_id_from_api(api_key: str, model_id_name: str, run_name: str):
     """
     Get a run ID from the REAL evaluations API using an API key, model name, and run name.
-    
+
     Args:
         api_key: REAL API key
         model_id_name: Name of the model being used
         run_name: Human-readable name for this run
-        
+
     Returns:
         A run ID string if successful, None otherwise
     """
@@ -32,15 +34,15 @@ def get_run_id_from_api(api_key: str, model_id_name: str, run_name: str):
         # URL encode parameters
         encoded_model_id_name = urllib.parse.quote(model_id_name)
         encoded_run_name = urllib.parse.quote(run_name)
-        
+
         # Construct the API URL
         # Prefer the REAL_API_BASE env override to support domain migrations (e.g., realevals.ai)
         base_url = os.getenv("REAL_API_BASE", "https://www.realevals.ai")
         url = f"{base_url.rstrip('/')}/api/runKey?api_key={api_key}&model_name={encoded_model_id_name}&run_name={encoded_run_name}"
-        
+
         # Make the request
         response = requests.get(url, timeout=10)
-        
+
         # Check if request was successful
         if response.status_code == 200:
             data = response.json()
@@ -50,10 +52,10 @@ def get_run_id_from_api(api_key: str, model_id_name: str, run_name: str):
                 logger.error(f"API response did not contain newRunId: {data}")
         else:
             logger.error(f"API request failed with status code {response.status_code}: {response.text}")
-            
+
     except Exception as e:
         logger.error(f"Error getting run ID from API: {e}")
-        
+
     return None
 
 class AbstractWebCloneTask(AbstractBrowserTask):
@@ -148,7 +150,7 @@ class AbstractWebCloneTask(AbstractBrowserTask):
             else:
                 self.run_id = '0'
                 logger.info(f"Using default run_id: {self.run_id}")
-            
+
         self.evaluator = WebCloneEvaluator(task_config=self.task_config)
         self.goal = self.task_config.get_goal()
         self.url = self.task_config.get_start_url()
@@ -177,10 +179,12 @@ class AbstractWebCloneTask(AbstractBrowserTask):
         self.page.close()
 
     def get_finish_json(self, timeout: int = 1000) -> dict:
+        logger.debug("Fetching finish JSON...")
         env_state_json = {}
         error_message = ""
         try:
             try:
+                logger.debug("Navigating to finish endpoint for env state")
                 self.background_page.goto(self.url+"/finish", timeout=timeout)
                 self.background_page.wait_for_load_state("networkidle", timeout=timeout)
                 pre_element = self.background_page.wait_for_selector("pre")
@@ -200,10 +204,123 @@ class AbstractWebCloneTask(AbstractBrowserTask):
             raise ValueError(error_message)
         return env_state_json
 
+    def _has_script_eval(self) -> bool:
+        """Return True if any evaluation uses a Python script."""
+        logger.debug("Checking for script-based evals")
+        try:
+            evals = self.task_config.get_evals()
+        except AttributeError:
+            logger.debug("Task config missing evals list")
+            return False
+        return any(
+            getattr(eval_config, "type", "") == "script"
+            or getattr(eval_config, "script", "")
+            for eval_config in evals
+        )
+
+    def _build_task_config_payload(self) -> dict:
+        """Build a minimal task_config payload for remote evaluation."""
+        logger.debug("Building task_config payload for Railway submission")
+        task = getattr(self.task_config, "task", None)
+        if not task:
+            logger.warning("Task config missing task details; returning empty payload")
+            return {"evals": [], "points": 0.0}
+
+        evals_payload = []
+        for eval_config in getattr(task, "evals", []):
+            if hasattr(eval_config, "to_json"):
+                evals_payload.append(eval_config.to_json())
+            else:
+                evals_payload.append(getattr(eval_config, "__dict__", {}))
+
+        payload: dict[str, object] = {
+            "evals": evals_payload,
+            "points": getattr(task, "points", 0.0) or 0.0,
+        }
+        script_names = [
+            getattr(eval_config, "script")
+            for eval_config in getattr(task, "evals", [])
+            if getattr(eval_config, "script", "")
+        ]
+        if script_names:
+            payload["eval_scripts"] = script_names
+        return payload
+
+    def _submit_script_leaderboard(
+        self, env_state_json: dict, model_response: str, info: dict, local_reward: float
+    ) -> None:
+        """Submit results for script-based tasks to the external evaluation service."""
+        logger.info("Preparing Railway submission for script-based task")
+        railway_url = f"{RAILWAY_API_BASE.rstrip('/')}/evaluate"
+        payload = {
+            "env_state": env_state_json,
+            "model_response": model_response,
+            "task_config": self._build_task_config_payload(),
+            "run_id": self.run_id,
+            "task_id": self.task_id,
+        }
+
+        logger.info("🚂 Script task: sending to Railway for evaluation and leaderboard submission...")
+        try:
+            logger.debug(f"POST {railway_url} with payload keys: {list(payload.keys())}")
+            railway_response = requests.post(railway_url, json=payload, timeout=30)
+        except requests.exceptions.Timeout:
+            logger.error("❌ Railway request timed out")
+            info["railway_verified"] = False
+            info["leaderboard_submitted"] = False
+            return
+        except Exception as exc:
+            logger.error(f"❌ Failed to send to Railway: {exc}")
+            info["railway_verified"] = False
+            info["leaderboard_submitted"] = False
+            return
+
+        if railway_response.status_code == 200:
+            try:
+                logger.debug("Railway responded with 200; parsing JSON")
+                railway_result = railway_response.json()
+            except json.JSONDecodeError as exc:
+                logger.error(f"❌ Railway response was not valid JSON: {exc}")
+                info["railway_verified"] = False
+                info["leaderboard_submitted"] = False
+                return
+
+            railway_reward = railway_result.get("reward", 0.0)
+            info["railway_reward"] = railway_reward
+            info["railway_verified"] = True
+            info["leaderboard_submitted"] = railway_result.get("leaderboard_submitted", False)
+            logger.info(f"✅ Railway evaluation complete: reward={railway_reward}")
+            logger.debug(f"Railway result payload: {railway_result}")
+
+            if local_reward != railway_reward:
+                logger.warning(f"⚠️ Evaluation mismatch! Local: {local_reward}, Railway: {railway_reward}")
+        else:
+            logger.error(f"❌ Railway returned status {railway_response.status_code}: {railway_response.text}")
+            info["railway_verified"] = False
+            info["leaderboard_submitted"] = False
+
+    def _submit_standard_leaderboard(self, model_response: str) -> None:
+        """Submit results to the legacy WebClones leaderboard endpoint."""
+        try:
+            logger.info("Submitting result to legacy /submit endpoint")
+            encoded_response = urllib.parse.quote(model_response)
+            response = self.background_page.goto(
+                self.url + "/submit?retrieved_answer=" + encoded_response
+            )
+            if response is None:
+                print("Warning: No response received when submitting to leaderboard")
+            else:
+                status = response.status
+                if status is not None and status >= 400:
+                    status_text = response.status_text or "Unknown status"
+                    print(f"Warning: Leaderboard submission returned HTTP {status} ({status_text})")
+        except Exception as exc:
+            print(f"Warning: Failed to submit response to server: {exc}")
+
 
     def validate(
-        self, 
-        page: playwright.sync_api.Page, 
+        self,
+        page: playwright.sync_api.Page,
         chat_messages: list[str],
         timeout: int = 1000,
         verbose: bool = True
@@ -212,39 +329,24 @@ class AbstractWebCloneTask(AbstractBrowserTask):
         # Treat model response as a challenge solution submission
         assistant_messages = [m for m in chat_messages if m["role"] == "assistant"]
         model_response = assistant_messages[-1]['message']
-        response = None
         if len(assistant_messages)>1:
             done = True
-            response = assistant_messages[1]['message']
+        logger.debug(f"Validation called. done={done}, leaderboard_run={getattr(self, 'run_id', '0')}")
         if done:
             env_state_json = self.get_finish_json(timeout=timeout)
             reward, _, message, info = self.evaluator.evaluate(env_state_json, model_response)
             message = "Task completed!" if done else "Task still in progress"
-            info = {"env_state": env_state_json}
+            info = {"env_state": env_state_json, "local_reward": reward}
             if model_response is None or model_response == "":
                 model_response = "Done"
-                
-            # Only submit to the server if a run_id was provided
-            # This sends the agent's answer to the leaderboard server
-            if getattr(self, 'run_id', '0') != '0':
-                try:
-                    # URL encode the response for safety 
-                    import urllib.parse
-                    encoded_response = urllib.parse.quote(model_response)
-                    response = self.background_page.goto(
-                        self.url + "/submit?retrieved_answer=" + encoded_response
-                    )
-                    if response is None:
-                        print("Warning: No response received when submitting to leaderboard at realevals.")
-                    else:
-                        status = response.status
-                        if status is not None and status >= 400:
-                            status_text = response.status_text or "Unknown status"
-                            print(
-                                f"Warning: Leaderboard submission returned HTTP {status} ({status_text}) "
-                                f"from realevals."
-                            )
-                except Exception as e:
-                    print(f"Warning: Failed to submit response to server: {e}")
-                    
+            is_leaderboard_submission = getattr(self, "run_id", "0") != "0"
+            logger.debug(f"Leaderboard submission? {is_leaderboard_submission}")
+            if is_leaderboard_submission:
+                if self._has_script_eval():
+                    logger.debug("Detected script eval; using Railway submission path")
+                    self._submit_script_leaderboard(env_state_json, model_response, info, reward)
+                else:
+                    logger.debug("No script eval; using legacy submit endpoint")
+                    self._submit_standard_leaderboard(model_response)
+
         return reward, done, message, info
