@@ -70,6 +70,16 @@ def split_task_reference(task_reference: str) -> Tuple[str, str]:
 
 @dataclass
 class Eval:
+    """
+    A class to represent evaluation configurations.
+    :param type: The type of evaluation
+    :param state_variable_path: The path to the state variable to evaluate
+    :param expected_value: The expected value of the state variable
+    :param reference_answer: The reference answer for the task
+    :param query: The JMESPath query to evaluate
+    :param description: A description of the evaluation
+    :param script: The Python script filename for subprocess-based evaluation
+    """
     type: str = ""
     expected_value: str = ""
     state_variable_path: str = ""
@@ -78,6 +88,8 @@ class Eval:
     description: str = ""
     possible: bool = True
     script: str = ""
+
+
 
     def to_json(self) -> Dict[str, Any]:
         return asdict(self)
@@ -152,11 +164,15 @@ class TaskConfig:
 
         if not self.is_valid_config():
             raise ValueError(f"Invalid task configuration for task ID: {self.id}")
-
+        # Create Eval instance
+        eval_configs = self.config_json['evals']
         eval_instances = []
-        for eval_config in self.config_json["evals"]:
-            if eval_config.get("script") and not eval_config.get("type"):
-                eval_config["type"] = "script"
+        for eval_config in eval_configs:
+            # Check if this is a script-based eval
+            if 'script' in eval_config and eval_config['script']:
+                # Set type to 'script' for subprocess-based evaluation
+                if 'type' not in eval_config or not eval_config['type']:
+                    eval_config['type'] = 'script'
             eval_instances.append(Eval(**eval_config))
 
         start_url = self.config_json["website"]["url"]
