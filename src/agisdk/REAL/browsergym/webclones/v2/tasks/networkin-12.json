@@ -1,5 +1,5 @@
 {
-  "id": "networkin_12",
+  "id": "networkin-12",
   "goal": "Network In: Send a message to a connection",
   "website": {
     "id": "networkin",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

@@ -1,5 +1,5 @@
 {
-  "id": "omnizon_16",
+  "id": "omnizon-16",
   "goal": "Order me one of those comfortable neck pillows, I have been having a lot of neck pain.",
   "website": {
     "id": "omnizon",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

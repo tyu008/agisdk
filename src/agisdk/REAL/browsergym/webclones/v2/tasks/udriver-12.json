@@ -1,5 +1,5 @@
 {
-  "id": "udriver_12",
+  "id": "udriver-12",
   "goal": "Show me how much it costs to get picked up from 333 Fremont Apartments and dropped at 201 Turk Street Apartments on July 18th at 3:30PM.",
   "website": {
     "id": "udriver",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

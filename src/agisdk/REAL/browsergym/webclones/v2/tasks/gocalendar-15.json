@@ -1,5 +1,5 @@
 {
-  "id": "gocalendar_15",
+  "id": "gocalendar-15",
   "goal": "GoCalendar: Delete the project sync from the calendar on Wednesday",
   "website": {
     "id": "gocalendar",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

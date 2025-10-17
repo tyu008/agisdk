@@ -1,5 +1,5 @@
 {
-  "id": "gomail_8",
+  "id": "gomail-8",
   "goal": "GoMail: Inform Danielle that the new system update has been launched",
   "website": {
     "id": "gomail",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

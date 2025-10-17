@@ -1,5 +1,5 @@
 {
-  "id": "topwork_17",
+  "id": "topwork-17",
   "goal": "Message a potential new hire if they are free",
   "website": {
     "id": "topwork",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

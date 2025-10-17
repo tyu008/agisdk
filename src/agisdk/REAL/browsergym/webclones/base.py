@@ -6,7 +6,11 @@ import logging
 
 import playwright.sync_api
 from agisdk.REAL.browsergym.core.task import AbstractBrowserTask
-from agisdk.REAL.browsergym.webclones.task_config import TaskConfig
+from agisdk.REAL.browsergym.webclones.task_config import (
+    TaskConfig,
+    DEFAULT_VERSION,
+    split_task_reference,
+)
 from agisdk.REAL.browsergym.webclones.evaluate import WebCloneEvaluator
 from agisdk.REAL.logging import logger as rich_logger
 
@@ -61,11 +65,24 @@ class AbstractWebCloneTask(AbstractBrowserTask):
     def get_task_id(cls):
         return cls.task_id
 
-    def __init__(self, seed: int, task_id: str, run_id: str = None, api_key: str = None, model_id_name: str = None, run_name: str = None) -> None:
+    def __init__(
+        self,
+        seed: int,
+        task_name: str = None,
+        task_version: str = None,
+        task_id: str = None,
+        run_id: str = None,
+        api_key: str = None,
+        model_id_name: str = None,
+        run_name: str = None
+    ) -> None:
         """
         Args:
             seed: Random seed for the task.
-            task_id: ID of the task to load.
+            task_name: Base task name (e.g. "dashdish-1").
+            task_version: Version label (e.g. "v2").
+            task_id: Canonical identifier ("v2.dashdish-1"). Deprecated in favour of
+                     passing task_name and task_version explicitly.
             run_id: Optional run ID for the task. If provided, overrides the run_id in the task config.
                    This is used for leaderboard submissions.
             api_key: Optional REAL API key for automatic run_id generation.
@@ -77,11 +94,25 @@ class AbstractWebCloneTask(AbstractBrowserTask):
         super().__init__(seed)
 
         self.seed = seed
-        self.task_id = task_id
-        self.task_config = TaskConfig(self.task_id)
-        if not self.task_config.is_valid_config():
-            raise ValueError(f"Invalid task configuration for task ID: {self.task_id}")
-            
+        resolved_name: str
+        resolved_version: str
+
+        if task_name and task_version:
+            resolved_name, resolved_version = task_name, task_version
+        elif task_id:
+            resolved_version, resolved_name = split_task_reference(task_id)
+        elif task_name:
+            resolved_name = task_name
+            resolved_version = task_version or DEFAULT_VERSION
+        else:
+            raise ValueError("task_name and task_version are required.")
+
+        self.task_config = TaskConfig(resolved_name, resolved_version)
+        self.task_name = self.task_config.task_name
+        self.task_version = self.task_config.version
+        self.task_id = self.task_name
+        self.canonical_task_id = self.task_config.canonical_id
+
         # Set run_id: prioritize RUNID environment variable,
         # then the explicitly provided run_id parameter,
         # then try to generate from API if api_key, model_id_name, and run_name are provided,
@@ -126,7 +157,7 @@ class AbstractWebCloneTask(AbstractBrowserTask):
                 self.url = os.environ["WEBCLONE_URL"]
             else:
                 raise ValueError("Provide a WebClones base URL or set it up as WEBCLONES_URL env var.")
-        rich_logger.info(f"⚙️ Initialized {self.task_id} task.")
+        rich_logger.info(f"⚙️ Initialized {self.canonical_task_id} task.")
         rich_logger.info(f"🎯 Goal: {self.goal}")
 
     def setup(self, page: playwright.sync_api.Page) -> tuple[str, dict]:

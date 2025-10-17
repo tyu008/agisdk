@@ -1,5 +1,5 @@
 {
-  "id": "opendining_5",
+  "id": "opendining-5",
   "goal": "OpenDining: Make a reservation for any restaurant in Embarcadero today which is over 3 stars",
   "website": {
     "id": "opendining",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

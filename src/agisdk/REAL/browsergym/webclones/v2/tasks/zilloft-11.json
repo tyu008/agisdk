@@ -1,5 +1,5 @@
 {
-  "id": "zilloft_11",
+  "id": "zilloft-11",
   "goal": "Zilloft: Find me a house over 1000 square feet",
   "website": {
     "id": "zilloft",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

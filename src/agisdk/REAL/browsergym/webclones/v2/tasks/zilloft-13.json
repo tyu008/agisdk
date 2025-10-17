@@ -1,5 +1,5 @@
 {
-  "id": "zilloft_13",
+  "id": "zilloft-13",
   "goal": "Zilloft: Find me houses to request a tour for that are 3 bed AND 3 bath",
   "website": {
     "id": "zilloft",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

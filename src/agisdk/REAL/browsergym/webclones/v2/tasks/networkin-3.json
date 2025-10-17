@@ -1,5 +1,5 @@
 {
-  "id": "networkin_3",
+  "id": "networkin-3",
   "goal": "Connect with 3 new people",
   "website": {
     "id": "networkin",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

@@ -1,5 +1,5 @@
 {
-  "id": "topwork_1",
+  "id": "topwork-1",
   "goal": "I need a UI/UX designer for my upcoming IOS project. They need to be skilled in JavaScript and TypeScript. It is a medium level project and I will pay 40-45$ an hour for this contractor position.",
   "website": {
     "id": "topwork",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

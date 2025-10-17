@@ -1,5 +1,5 @@
 {
-  "id": "zilloft_5",
+  "id": "zilloft-5",
   "goal": "Request a tour for a house for July 19th around the Los Angeles area that are under 350,000$ and have 2+ bedrooms and 1+ bathrooms.",
   "website": {
     "id": "zilloft",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

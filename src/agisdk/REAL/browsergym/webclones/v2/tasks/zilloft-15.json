@@ -1,5 +1,5 @@
 {
-  "id": "zilloft_15",
+  "id": "zilloft-15",
   "goal": "Show me houses in California under 900k and have 3+ bedrooms",
   "website": {
     "id": "zilloft",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

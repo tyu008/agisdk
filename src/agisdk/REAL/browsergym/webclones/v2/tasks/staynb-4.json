@@ -1,5 +1,5 @@
 {
-  "id": "staynb_4",
+  "id": "staynb-4",
   "goal": "I am bored so find me places around me for tonight with a pool, wifi, free parking, and AC.",
   "website": {
     "id": "staynb",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

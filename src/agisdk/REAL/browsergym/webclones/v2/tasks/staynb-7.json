@@ -1,5 +1,5 @@
 {
-  "id": "staynb_7",
+  "id": "staynb-7",
   "goal": "Staynb: Find and book me a one night oceanfront stay for any price",
   "website": {
     "id": "staynb",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

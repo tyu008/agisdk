@@ -1,5 +1,5 @@
 {
-  "id": "dashdish_4",
+  "id": "dashdish-4",
   "goal": "DashDish: I really want to eat rice, order me meals which contain rice for less than $30",
   "website": {
     "id": "dashdish",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

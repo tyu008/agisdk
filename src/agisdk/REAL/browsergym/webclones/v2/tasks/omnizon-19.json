@@ -1,5 +1,5 @@
 {
-  "id": "omnizon_19",
+  "id": "omnizon-19",
   "goal": "Order me an apron and a pot for cooking.",
   "website": {
     "id": "omnizon",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

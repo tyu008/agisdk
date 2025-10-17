@@ -1,5 +1,5 @@
 {
-  "id": "gomail_18",
+  "id": "gomail-18",
   "goal": "Write an email to Charles Davis that he's fired.",
   "website": {
     "id": "gomail",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

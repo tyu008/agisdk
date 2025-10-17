@@ -1,5 +1,5 @@
 {
-  "id": "omnizon_2",
+  "id": "omnizon-2",
   "goal": "Find me headphones above 24$ and below 100$ and order it.",
   "website": {
     "id": "omnizon",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

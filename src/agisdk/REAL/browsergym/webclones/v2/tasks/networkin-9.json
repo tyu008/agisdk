@@ -1,5 +1,5 @@
 {
-  "id": "networkin_9",
+  "id": "networkin-9",
   "goal": "Invite someone working in the tech industry living in new york to join my new project.",
   "website": {
     "id": "networkin",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

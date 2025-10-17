@@ -1,5 +1,5 @@
 {
-  "id": "dashdish_17",
+  "id": "dashdish-17",
   "goal": "Hello, I would like BBQ Wings. Please leave a 4 dollar tip for driver and make it express delivery. Thank you.",
   "website": {
     "id": "dashdish",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

@@ -1,5 +1,5 @@
 {
-  "id": "dashdish_9",
+  "id": "dashdish-9",
   "goal": "Order $20 worth of food from Taco Boys",
   "website": {
     "id": "dashdish",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

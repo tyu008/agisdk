@@ -1,5 +1,5 @@
 {
-  "id": "opendining_3",
+  "id": "opendining-3",
   "goal": "Look at the top rated restaurants people are talking about and book a reservation for 9pm tonight for any of them.",
   "website": {
     "id": "opendining",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

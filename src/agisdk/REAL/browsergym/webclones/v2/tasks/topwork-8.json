@@ -1,5 +1,5 @@
 {
-  "id": "topwork_8",
+  "id": "topwork-8",
   "goal": "Rehire someone I've already hired as a project lead.",
   "website": {
     "id": "topwork",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

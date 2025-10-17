@@ -1,5 +1,5 @@
 {
-  "id": "omnizon_7",
+  "id": "omnizon-7",
   "goal": "Omnizon: I need to cook for my friends party, order me a nice cooking pot",
   "website": {
     "id": "omnizon",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

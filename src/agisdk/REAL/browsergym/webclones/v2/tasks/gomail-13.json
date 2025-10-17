@@ -1,5 +1,5 @@
 {
-  "id": "gomail_13",
+  "id": "gomail-13",
   "goal": "Write an email to alexa richardson and ask to let me know when the files come in.",
   "website": {
     "id": "gomail",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

@@ -1,5 +1,5 @@
 {
-  "id": "opendining_2",
+  "id": "opendining-2",
   "goal": "Book me a reservation at an Italian Restaurant for today at 3pm.",
   "website": {
     "id": "opendining",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }

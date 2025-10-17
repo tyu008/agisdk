@@ -1,5 +1,5 @@
 {
-  "id": "staynb_9",
+  "id": "staynb-9",
   "goal": "book a stay in los angeles with wifi under 600$ nightly for the dates september 1st to 3rd.",
   "website": {
     "id": "staynb",
@@ -17,5 +17,6 @@
     }
   ],
   "points": 1,
-  "config": {}
+  "config": {},
+  "version": "v2"
 }
