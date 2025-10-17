@@ -4,8 +4,8 @@ from agisdk import REAL
 # Optional leaderboard configuration.
 # Set REAL_API_KEY / REAL_RUN_ID / REAL_MODEL_NAME / REAL_RUN_NAME in your environment
 # (or replace the placeholders below) to submit results to the REAL portal.
-API_KEY = os.environ.get("REAL_API_KEY") or "a5e94ced11c46ca1c211a349a3df59e752e76d68157324f7c7f6697a8d12dc59"
-RUN_ID = os.environ.get("REAL_RUN_ID") or "8acbb2cc-9316-4e3c-b845-957a8709f4f9"
+API_KEY = os.environ.get("REAL_API_KEY") or "<Your API key>"
+RUN_ID = os.environ.get("REAL_RUN_ID") or "<Your run ID>"
 
 submit_to_leaderboard = (
     API_KEY not in ("", "<YOUR_REAL_API_KEY>")
