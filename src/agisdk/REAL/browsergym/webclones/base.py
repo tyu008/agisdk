@@ -165,7 +165,13 @@ class AbstractWebCloneTask(AbstractBrowserTask):
     def setup(self, page: playwright.sync_api.Page) -> tuple[str, dict]:
         self.page = page
         self.background_page = page.context.new_page()
-        config_url = self.url + f"/config?run_id={self.run_id}&task_id={self.task_id}&latency=0"
+        # Historical v1 leaderboard expects bare task ids (e.g., "dashdish-3") rather than "v1.dashdish-3".
+        config_task_id = self.canonical_task_id
+        if self.task_version == "v1" and getattr(self, "run_id", "0") != "0":
+            config_task_id = self.task_name
+        config_url = self.url + (
+            f"/config?run_id={self.run_id}&task_id={config_task_id}&latency=0"
+        )
         self.background_page.goto(config_url)
         self.background_page.wait_for_load_state("networkidle")
         finish_url = self.url + "/finish"
