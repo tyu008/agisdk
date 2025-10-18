@@ -85,6 +85,7 @@ class DemoAgent(Agent):
         openrouter_site_url: Optional[str] = None,
         openrouter_site_name: Optional[str] = None,
         anthropic_api_key: Optional[str] = None,
+        xai_api_key: Optional[str] = None,
     ) -> None:
         super().__init__()
         self.chat_mode = chat_mode
@@ -100,12 +101,49 @@ class DemoAgent(Agent):
         from openai import OpenAI
         from anthropic import Anthropic
         import os
+        import httpx
 
         if model_name.startswith("gpt-") or model_name.startswith("o1") or model_name.startswith("o3"):
             # Use provided API key or fall back to environment variable
             self.client = OpenAI(api_key=openai_api_key)
             self.model_name = model_name
             # Define function to query OpenAI models
+            def query_model(system_msgs, user_msgs):
+                if self.system_message_handling == "combined":
+                    # Combine system and user messages into a single user message
+                    combined_content = ""
+                    if system_msgs:
+                        combined_content += system_msgs[0]["text"] + "\n\n"
+                    for msg in user_msgs:
+                        if msg["type"] == "text":
+                            combined_content += msg["text"] + "\n"
+                    response = self.client.chat.completions.create(
+                        model=self.model_name,
+                        messages=[
+                            {"role": "user", "content": combined_content},
+                        ],
+                    )
+                else:
+                    response = self.client.chat.completions.create(
+                        model=self.model_name,
+                        messages=[
+                            {"role": "system", "content": system_msgs},
+                            {"role": "user", "content": user_msgs},
+                        ],
+                    )
+                return response.choices[0].message.content
+            self.query_model = query_model
+            
+        elif model_name.startswith("grok"):
+            # Use x.AI's Grok models
+            self.client = OpenAI(
+                api_key=xai_api_key or os.getenv("XAI_API_KEY"),
+                base_url="https://api.x.ai/v1",
+                timeout=httpx.Timeout(3600.0),  # Override default timeout with longer timeout for reasoning models
+            )
+            self.model_name = model_name
+            
+            # Define function to query Grok models
             def query_model(system_msgs, user_msgs):
                 if self.system_message_handling == "combined":
                     # Combine system and user messages into a single user message
@@ -343,7 +381,7 @@ class DemoAgent(Agent):
             subsets=["chat", "bid", "infeas"],  # define a subset of the action space
             # subsets=["chat", "bid", "coord", "infeas"] # allow the agent to also use x,y coordinates
             strict=False,  # less strict on the parsing of the actions
-            multiaction=False,  # does not enable the agent to take multiple actions at once
+            multiaction=True,  # enable the agent to take multiple actions at once
             demo_mode=demo_mode,  # add visual effects
         )
         # use this instead to allow the agent to directly use Python code
@@ -618,6 +656,7 @@ class DemoAgentArgs(AbstractAgentArgs):
     openrouter_site_url: Optional[str] = None
     openrouter_site_name: Optional[str] = None
     anthropic_api_key: Optional[str] = None
+    xai_api_key: Optional[str] = None
 
     def make_agent(self):
         return DemoAgent(
@@ -635,4 +674,5 @@ class DemoAgentArgs(AbstractAgentArgs):
             openrouter_site_url=self.openrouter_site_url,
             openrouter_site_name=self.openrouter_site_name,
             anthropic_api_key=self.anthropic_api_key,
+            xai_api_key=self.xai_api_key,
         )

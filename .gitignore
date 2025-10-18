@@ -13,5 +13,5 @@ build
 .env.*
 
 **/.claude/settings.local.json
-
+results/**
 uv.lock
