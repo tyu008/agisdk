@@ -13,7 +13,7 @@ def run_agent(api_key=None, run_name=None):
     """
 
     harness = REAL.harness(
-        model="grok-4-fast-non-reasoning",       # any LLM tag
+        model="grok-4-fast-reasoning",       # any LLM tag
         task_type="omnizon",  # Amazon-like store
         headless=False        # watch it click in real-time!
     )
