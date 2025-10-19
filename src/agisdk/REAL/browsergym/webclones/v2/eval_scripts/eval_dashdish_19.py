@@ -23,24 +23,31 @@ def get_nested(d, *keys):
     return cur
 
 
-def extract_cart_items(data):
-    items = []
+def extract_cart_items_and_shipping(data):
+    """Extract items and shipping from completed orders first, then fall back to cart."""
     initial = data.get('initialfinaldiff', {})
+
     for section in ['added', 'updated']:
         cart = get_nested(initial, section, 'cart') or {}
+
+        # Check completed orders first
+        orders = cart.get('foodOrders')
+        if isinstance(orders, dict) and orders:
+            for order in orders.values():
+                if isinstance(order, dict):
+                    items = order.get('cartItems')
+                    shipping = get_nested(order, 'checkoutDetails', 'shipping')
+                    if isinstance(items, list) and items:
+                        # Return items and shipping from first valid order
+                        return ([x for x in items if isinstance(x, dict)], shipping or {})
+
+        # Fall back to cart items
         cis = cart.get('cartItems')
-        if isinstance(cis, list):
-            items.extend([x for x in cis if isinstance(x, dict)])
-    return items
+        if isinstance(cis, list) and cis:
+            shipping = get_nested(cart, 'checkoutDetails', 'shipping')
+            return ([x for x in cis if isinstance(x, dict)], shipping or {})
 
-
-def extract_shipping(data):
-    initial = data.get('initialfinaldiff', {})
-    for section in ['added', 'updated']:
-        shipping = get_nested(initial, section, 'cart', 'checkoutDetails', 'shipping')
-        if isinstance(shipping, dict):
-            return shipping
-    return {}
+    return ([], {})
 
 
 def normalize_name(name):
@@ -109,8 +116,7 @@ def main():
         print('FAILURE')
         return
 
-    items = extract_cart_items(data)
-    shipping = extract_shipping(data)
+    items, shipping = extract_cart_items_and_shipping(data)
 
     # Validate shipping: Delivery + Express
     delivery_mode = (shipping.get('shippingOption') or '').strip().lower()

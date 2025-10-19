@@ -13,19 +13,6 @@ def to_float(val):
         return None
 
 
-def get_cart_items(data):
-    items = []
-    initialfinaldiff = data.get('initialfinaldiff', {})
-    for section in ['added', 'updated']:
-        sec = initialfinaldiff.get(section, {})
-        cart = sec.get('cart')
-        if isinstance(cart, dict):
-            ci = cart.get('cartItems')
-            if isinstance(ci, list):
-                items.extend([x for x in ci if isinstance(x, dict)])
-    return items
-
-
 def get_item_price(item):
     # Prefer finalPrice, else try basePrice+extraCost, else price
     final_price = item.get('finalPrice')
@@ -49,23 +36,29 @@ def is_pizza(item):
     return 'pizza' in name.lower()
 
 
-def verify(data):
-    items = get_cart_items(data)
-    if not items:
+def has_exactly_one_valid_pizza(items):
+    """Check if items list contains exactly one pizza strictly under $30."""
+    if not isinstance(items, list):
         return False
-    pizza_items = [it for it in items if is_pizza(it) and (to_float(it.get('quantity')) is None or to_float(it.get('quantity')) >= 1)]
-    if not pizza_items:
+    pizza_items = [it for it in items if isinstance(it, dict) and is_pizza(it) and to_float(it.get('quantity', 1)) != 0]
+    # Must have exactly one pizza item
+    if len(pizza_items) != 1:
         return False
-    if len(pizza_items) > 1:
+    # The pizza must be strictly under $30
+    price = get_item_price(pizza_items[0])
+    if price is None:
         return False
-    # All pizza items present should be strictly under $30
-    for it in pizza_items:
-        price = get_item_price(it)
-        if price is None:
-            return False
-        if price >= 30.0:
-            return False
+    if price >= 30.0:
+        return False
     return True
+
+
+def evaluate_order(order_obj):
+    """Evaluate a single order object."""
+    if not isinstance(order_obj, dict):
+        return False
+    items = order_obj.get('cartItems', [])
+    return has_exactly_one_valid_pizza(items)
 
 
 def main():
@@ -73,11 +66,42 @@ def main():
         path = sys.argv[1]
         with open(path, 'r') as f:
             data = json.load(f)
-        result = verify(data)
-        print('SUCCESS' if result else 'FAILURE')
     except Exception:
-        # On any unexpected error, mark as failure
         print('FAILURE')
+        return
+
+    added = (data.get('initialfinaldiff') or {}).get('added') or {}
+    cart = added.get('cart') or {}
+
+    # 1) Prefer completed orders if present
+    orders = cart.get('foodOrders')
+    order_candidates = []
+    if isinstance(orders, dict) and orders:
+        order_candidates.extend(list(orders.values()))
+    elif isinstance(orders, list) and orders:
+        order_candidates.extend(orders)
+
+    # Fallback: differences.foodOrders.added
+    if not order_candidates:
+        diffs_orders = ((data.get('differences') or {}).get('foodOrders') or {}).get('added')
+        if isinstance(diffs_orders, dict) and diffs_orders:
+            order_candidates.extend(list(diffs_orders.values()))
+        elif isinstance(diffs_orders, list) and diffs_orders:
+            order_candidates.extend(diffs_orders)
+
+    # Evaluate any order that has exactly one valid pizza
+    for ord_obj in order_candidates:
+        if evaluate_order(ord_obj):
+            print('SUCCESS')
+            return
+
+    # 2) Evaluate current cart if no qualifying order found
+    cart_items = cart.get('cartItems', [])
+    if has_exactly_one_valid_pizza(cart_items):
+        print('SUCCESS')
+        return
+
+    print('FAILURE')
 
 if __name__ == '__main__':
     main()

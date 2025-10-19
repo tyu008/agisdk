@@ -103,6 +103,29 @@ def main():
         return
 
     cart = safe_get(data, ['initialfinaldiff', 'added', 'cart'], {}) or {}
+
+    # Check completed orders first
+    orders = cart.get('foodOrders')
+    order_candidates = []
+    if isinstance(orders, dict) and orders:
+        order_candidates.extend(list(orders.values()))
+    elif isinstance(orders, list) and orders:
+        order_candidates.extend(orders)
+
+    for ord_obj in order_candidates:
+        if isinstance(ord_obj, dict):
+            items = ord_obj.get('cartItems', []) or []
+            if items:
+                # Check for at least one Asian item
+                asian_present = any(item_is_asian(it) for it in items)
+                # Compute total and verify under budget
+                total = compute_total(ord_obj)
+                under_budget = (total > 0) and (total < 45.0)
+                if asian_present and under_budget:
+                    print("SUCCESS")
+                    return
+
+    # Check cart if no order found
     items = cart.get('cartItems', []) or []
     if not items:
         print("FAILURE")

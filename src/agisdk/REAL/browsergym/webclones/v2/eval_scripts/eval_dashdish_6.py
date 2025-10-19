@@ -53,6 +53,27 @@ def main():
             .get('cart', {})
     )
 
+    # Check completed orders first
+    orders = cart.get('foodOrders')
+    order_candidates = []
+    if isinstance(orders, dict) and orders:
+        order_candidates.extend(list(orders.values()))
+    elif isinstance(orders, list) and orders:
+        order_candidates.extend(orders)
+
+    for ord_obj in order_candidates:
+        if isinstance(ord_obj, dict):
+            items = ord_obj.get('cartItems', [])
+            fries_ok = has_fries(items)
+            charges = ord_obj.get('checkoutDetails', {}).get('charges', {})
+            total_amount = to_float(charges.get('totalAmount'))
+            # Validate total: must be positive and strictly under $15
+            budget_ok = (total_amount is not None) and (total_amount > 0) and (total_amount < 15.0)
+            if fries_ok and budget_ok:
+                print("SUCCESS")
+                return
+
+    # Check cart if no order found
     cart_items = cart.get('cartItems', [])
     fries_ok = has_fries(cart_items)
 
@@ -62,8 +83,8 @@ def main():
     )
     total_amount = to_float(charges.get('totalAmount'))
 
-    # Validate total: must be a positive number and not exceed $20.00
-    budget_ok = (total_amount is not None) and (total_amount > 0) and (total_amount <= 10.0)
+    # Validate total: must be positive and strictly under $15
+    budget_ok = (total_amount is not None) and (total_amount > 0) and (total_amount < 15.0)
 
     if fries_ok and budget_ok:
         print("SUCCESS")

@@ -52,6 +52,37 @@ def main():
     cart = get_nested(data, ["initialfinaldiff", "added", "cart"]) or \
            get_nested(data, ["initialfinaldiff", "updated", "cart"]) or {}
 
+    # Check completed orders first
+    orders = cart.get('foodOrders')
+    order_candidates = []
+    if isinstance(orders, dict) and orders:
+        order_candidates.extend(list(orders.values()))
+    elif isinstance(orders, list) and orders:
+        order_candidates.extend(orders)
+
+    for ord_obj in order_candidates:
+        if isinstance(ord_obj, dict):
+            items = ord_obj.get('cartItems', [])
+            if isinstance(items, list):
+                bbq_item_present = any(is_bbq_wings(item.get("name", "")) for item in items)
+
+                if bbq_item_present:
+                    checkout = ord_obj.get("checkoutDetails", {})
+                    shipping = checkout.get("shipping", {}) if isinstance(checkout, dict) else {}
+                    charges = checkout.get("charges", {}) if isinstance(checkout, dict) else {}
+
+                    shipping_option = str(shipping.get("shippingOption", "")).strip().lower()
+                    delivery_option = str(shipping.get("deliveryOption", "")).strip().lower()
+                    tip_val = parse_float(charges.get("tip"))
+
+                    cond_shipping = (shipping_option == "delivery") and (delivery_option == "express")
+                    cond_tip = (tip_val is not None) and (abs(tip_val - 4.0) < 1e-6)
+
+                    if cond_shipping and cond_tip:
+                        print("SUCCESS")
+                        return
+
+    # Check cart if no order found
     cart_items = cart.get("cartItems")
     if not isinstance(cart_items, list):
         cart_items = []

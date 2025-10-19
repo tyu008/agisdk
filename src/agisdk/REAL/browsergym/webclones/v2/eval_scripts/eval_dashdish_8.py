@@ -22,6 +22,45 @@ try:
 
     # Navigate to cart data
     cart = safe_get(data, ["initialfinaldiff", "added", "cart"], {}) or {}
+
+    # Check completed orders first
+    orders = cart.get('foodOrders')
+    order_candidates = []
+    if isinstance(orders, dict) and orders:
+        order_candidates.extend(list(orders.values()))
+    elif isinstance(orders, list) and orders:
+        order_candidates.extend(orders)
+
+    for ord_obj in order_candidates:
+        if isinstance(ord_obj, dict):
+            items = ord_obj.get('cartItems', [])
+            if isinstance(items, list) and len(items) > 0:
+                # Identify presence of a sub-sandwich by item name
+                has_sub = False
+                for item in items:
+                    name = ""
+                    if isinstance(item, dict):
+                        name = str(item.get("name", ""))
+                    lname = name.lower()
+                    # Accept either 'sub' or 'sandwich' anywhere in the name
+                    if ("sub" in lname) or ("sandwich" in lname):
+                        has_sub = True
+                        break
+
+                if has_sub:
+                    # Validate total amount constraints
+                    total_amount = safe_get(ord_obj, ["checkoutDetails", "charges", "totalAmount"], None)
+                    try:
+                        total_val = float(total_amount)
+                    except (TypeError, ValueError):
+                        continue
+
+                    # Must be an actual placed order: total > 0 and strictly under $30
+                    if total_val > 0 and total_val < 30.0:
+                        print("SUCCESS")
+                        sys.exit(0)
+
+    # Check cart if no order found
     cart_items = cart.get("cartItems")
     if not isinstance(cart_items, list) or len(cart_items) == 0:
         print("FAILURE")

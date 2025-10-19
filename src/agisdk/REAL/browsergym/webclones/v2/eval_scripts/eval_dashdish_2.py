@@ -81,6 +81,25 @@ def main():
         print('FAILURE')
         return
 
+    # Check completed orders first
+    orders = cart.get('foodOrders')
+    order_candidates = []
+    if isinstance(orders, dict) and orders:
+        order_candidates.extend(list(orders.values()))
+    elif isinstance(orders, list) and orders:
+        order_candidates.extend(orders)
+
+    for ord_obj in order_candidates:
+        if isinstance(ord_obj, dict):
+            shipping = (ord_obj.get('checkoutDetails') or {}).get('shipping', {})
+            if is_delivery_to_home(shipping):
+                items = ord_obj.get('cartItems', [])
+                coffee_qty = coffee_like_quantity(items)
+                if coffee_qty == 1:
+                    print('SUCCESS')
+                    return
+
+    # Check cart if no order found
     shipping = (cart.get('checkoutDetails') or {}).get('shipping', {})
     if not is_delivery_to_home(shipping):
         print('FAILURE')

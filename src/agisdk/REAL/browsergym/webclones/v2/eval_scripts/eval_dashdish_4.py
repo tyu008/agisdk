@@ -122,6 +122,28 @@ def main():
         if not cart:
             print('FAILURE')
             return
+
+        # Check completed orders first
+        orders = cart.get('foodOrders')
+        order_candidates = []
+        if isinstance(orders, dict) and orders:
+            order_candidates.extend(list(orders.values()))
+        elif isinstance(orders, list) and orders:
+            order_candidates.extend(orders)
+
+        for ord_obj in order_candidates:
+            if isinstance(ord_obj, dict):
+                items = ord_obj.get('cartItems') or []
+                if isinstance(items, list) and len(items) > 0:
+                    # All items must be rice meals
+                    if all(is_rice_meal(it) for it in items):
+                        total = compute_total(ord_obj, items)
+                        # Must be strictly less than $30
+                        if total is not None and total < 30:
+                            print('SUCCESS')
+                            return
+
+        # Check cart if no order found
         items = cart.get('cartItems') or []
         if not isinstance(items, list) or len(items) == 0:
             print('FAILURE')
