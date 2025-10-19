@@ -56,12 +56,14 @@ def verify(data):
     pizza_items = [it for it in items if is_pizza(it) and (to_float(it.get('quantity')) is None or to_float(it.get('quantity')) >= 1)]
     if not pizza_items:
         return False
+    if len(pizza_items) > 1:
+        return False
     # All pizza items present should be strictly under $30
     for it in pizza_items:
         price = get_item_price(it)
         if price is None:
             return False
-        if price >= 60.0:
+        if price >= 30.0:
             return False
     return True
 

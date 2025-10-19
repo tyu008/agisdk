@@ -63,7 +63,7 @@ def main():
     total_amount = to_float(charges.get('totalAmount'))
 
     # Validate total: must be a positive number and not exceed $20.00
-    budget_ok = (total_amount is not None) and (total_amount > 0) and (total_amount <= 20.0)
+    budget_ok = (total_amount is not None) and (total_amount > 0) and (total_amount <= 10.0)
 
     if fries_ok and budget_ok:
         print("SUCCESS")
