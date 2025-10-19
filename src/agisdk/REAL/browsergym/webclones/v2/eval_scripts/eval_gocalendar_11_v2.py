@@ -92,6 +92,29 @@ def check_location(location, target="sunnyvale"):
     return 0.0, f"Wrong location: '{location}'"
 
 
+def gather_added_events(data):
+    """Gather added events from various locations in the data structure."""
+    # Handle nested structure from summary_info.json (finish_state.env_state.differences)
+    if 'finish_state' in data and isinstance(data['finish_state'], dict):
+        env_state = data['finish_state'].get('env_state', {})
+        if isinstance(env_state, dict):
+            diff = env_state.get('differences', {})
+            events = diff.get('events', {})
+            added = events.get('added', {})
+            if isinstance(added, dict) and added:
+                return added
+    
+    # From differences.events.added (direct structure)
+    diffs = data.get('differences', {})
+    events = diffs.get('events', {})
+    added = events.get('added', {})
+    
+    if not isinstance(added, dict):
+        return {}
+    
+    return added
+
+
 def evaluate_task(data_path, output_format="json"):
     """Main evaluation function."""
     evaluator = PartialCreditEvaluator(task_name="v2.gocalendar-11", output_format=output_format)
@@ -132,9 +155,7 @@ def evaluate_task(data_path, output_format="json"):
         return
     
     # Get added events
-    diffs = data.get('differences', {})
-    events = diffs.get('events', {})
-    added = events.get('added', {})
+    added = gather_added_events(data)
     
     if not isinstance(added, dict):
         added = {}
