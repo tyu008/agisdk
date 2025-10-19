@@ -30,7 +30,17 @@ def gather_added_emails(data):
     """Gather all added emails from various locations in the data structure."""
     added = []
     
-    # From differences.emails.added
+    # Handle nested structure from summary_info.json (finish_state.env_state.differences)
+    if 'finish_state' in data and isinstance(data['finish_state'], dict):
+        env_state = data['finish_state'].get('env_state', {})
+        if isinstance(env_state, dict):
+            diff = env_state.get('differences') or {}
+            emails_section = (diff.get('emails') or {}) if isinstance(diff, dict) else {}
+            diff_added = emails_section.get('added') or []
+            if isinstance(diff_added, list):
+                added.extend(diff_added)
+    
+    # From differences.emails.added (direct structure)
     diff = data.get('differences') or {}
     emails_section = (diff.get('emails') or {}) if isinstance(diff, dict) else {}
     diff_added = emails_section.get('added') or []
@@ -162,7 +172,6 @@ def check_sent_status(email):
 
 
 def evaluate_task(data_path, output_format="json"):
-    print(f"some random text in evaluate_task")
     """Main evaluation function."""
     # Initialize evaluator
     evaluator = PartialCreditEvaluator(task_name="v2.gomail-13", output_format=output_format)
