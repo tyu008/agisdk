@@ -43,7 +43,7 @@ class DemoAgent(Agent):
             "goal_object": obs["goal_object"],
             "last_action": obs["last_action"],
             "last_action_error": obs["last_action_error"],
-            "axtree_txt": flatten_axtree_to_str(obs["axtree_object"]),
+            "axtree_txt": flatten_axtree_to_str(obs["axtree_object"], skip_generic=False),
             "pruned_html": prune_html(flatten_dom_to_str(obs["dom_object"])),
         }
 
