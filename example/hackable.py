@@ -14,7 +14,7 @@ from custom_agent import DemoAgentArgs  # Import from separate module to allow R
 logger = logging.getLogger(__name__)
 
 
-def run_demo_agent(model_name="gpt-4o", task_type="omnizon", headless=False, leaderboard=False, run_id=None, workers=1, results_dir="./results"):
+def run_demo_agent(model_name="gpt-4o", task_type=None, task_name=None, headless=False, leaderboard=False, run_id=None, workers=1, results_dir="./results"):
     """Run a test with the DemoAgent on a browsergym task."""
     logger.info(f"Starting DemoAgent test with model: {model_name} on task: {task_type}")
     logger.info(f"Results will be saved to: {results_dir}")
@@ -35,6 +35,7 @@ def run_demo_agent(model_name="gpt-4o", task_type="omnizon", headless=False, lea
     harness = REAL.harness(
         agentargs=agent_args,
         task_type=task_type,  # Uncommented - now respects task_type parameter
+        task_name=task_name,
         headless=headless,
         max_steps=25,
         use_axtree=agent_args.use_axtree,
@@ -69,6 +70,8 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, default="gpt-4o",
                         help="Model to use with the agent (default: gpt-4o)")
     parser.add_argument("--task_type", type=str, default=None, help="Task to run (default: None, run all tasks)")
+    
+    parser.add_argument("--task_name", type=str, default=None, help="Task name to run (default: None, run all tasks)")
     parser.add_argument("--headless", type=str2bool, default=False,
                         help="Run headless (default: False - browser visible)")
     parser.add_argument("--run_id", type=str, default=None,
@@ -85,6 +88,7 @@ if __name__ == "__main__":
     results = run_demo_agent(
         model_name=args.model, 
         task_type=args.task_type, 
+        task_name=args.task_name,
         headless=args.headless,
         leaderboard=args.leaderboard,
         run_id=args.run_id,

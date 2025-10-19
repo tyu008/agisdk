@@ -334,13 +334,26 @@ class AbstractWebCloneTask(AbstractBrowserTask):
         reward, done, message, info = 0.0, False, "", {}
         # Treat model response as a challenge solution submission
         assistant_messages = [m for m in chat_messages if m["role"] == "assistant"]
-        model_response = assistant_messages[-1]['message']
-        if len(assistant_messages)>1:
-            done = True
-        logger.debug(f"Validation called. done={done}, leaderboard_run={getattr(self, 'run_id', '0')}")
-        if done:
+        model_response = assistant_messages[-1]['message'] if assistant_messages else ""
+        
+        # Try to get environment state to check if task is complete
+        # This allows evaluation even if agent doesn't send completion message
+        env_state_json = {}
+        try:
             env_state_json = self.get_finish_json(timeout=timeout)
+        except Exception as e:
+            logger.debug(f"Could not fetch environment state: {e}")
+        
+        # Evaluate if agent signaled completion OR if we have environment state to check
+        should_evaluate = len(assistant_messages) > 1 or bool(env_state_json)
+        
+        logger.debug(f"Validation called. assistant_msgs={len(assistant_messages)}, "
+                    f"has_env_state={bool(env_state_json)}, should_evaluate={should_evaluate}, "
+                    f"leaderboard_run={getattr(self, 'run_id', '0')}")
+        
+        if should_evaluate:
             reward, _, message, info = self.evaluator.evaluate(env_state_json, model_response)
+            done = (reward > 0) or (len(assistant_messages) > 1)
             message = "Task completed!" if done else "Task still in progress"
             info = {"env_state": env_state_json, "local_reward": reward}
             if model_response is None or model_response == "":
