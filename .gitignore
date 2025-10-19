@@ -1,6 +1,9 @@
 results
+all_results_assamble
 *.DS_Store
 *.pyc
+*.md
+*.json
 browser-use
 browseruse
 learnstagehand
@@ -14,4 +17,6 @@ build
 
 **/.claude/settings.local.json
 results/**
+all_results_assamble/**
+all
 uv.lock

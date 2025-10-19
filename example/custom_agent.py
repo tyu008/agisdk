@@ -234,6 +234,7 @@ You will now think step by step and produce your next best action. Reflect on yo
         logger.info(full_prompt_txt)
         
         action = self._query_model(system_msgs, user_msgs)
+        logger.info(f"Action from query model: {action}")
         self.action_history.append(action)
         
         return action, {}
