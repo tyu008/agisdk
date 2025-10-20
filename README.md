@@ -98,9 +98,11 @@ python example/hackable.py --model grok-4-fast-reasoning --headless True \
   <img src="figures/Figure_2.png" alt="Performance comparisons between the original benchmark and our improved benchmark" width="700">
 </p>
 
-> **Note**: After fixing some evaluation logic errors and enviroment issues,`grok-4-fast-reasoning` model, achieves a significantly higher success ratio on our improved benchmark than that in the original benchmark. 
+> **Note**: After fixing some evaluation logic errors and enviroment issues,`grok-4-fast-reasoning` model, achieves a significantly higher success ratio on our improved benchmark than that in the original benchmark. The detailed evaluation report includes comprehensive task-by-task analysis, failure patterns, and reproducibility instructions.
 
 📁 **[Access detailed results logs on Google Drive](https://drive.google.com/file/d/1IawGFUvwedsRseJAaYXZJWsBjI-L7I3Q/view?usp=sharing)**
+
+
 
 ## 🤝 Contributing
 
