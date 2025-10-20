@@ -98,28 +98,10 @@ python example/hackable.py --model grok-4-fast-reasoning --headless True \
   <img src="figures/Figure_2.png" alt="Performance comparisons between the original benchmark and our improved benchmark" width="700">
 </p>
 
-> **Note**: After fixing some evaluation logic errors and enviroment issues,`grok-4-fast-reasoning` model, achieves a significantly higher success ratio on our improved benchmark than that in the original benchmark. The detailed evaluation report includes comprehensive task-by-task analysis, failure patterns, and reproducibility instructions.
+> **Note**: After fixing some evaluation logic errors and enviroment issues,`grok-4-fast-reasoning` model, achieves a significantly higher success ratio on our improved benchmark than that in the original benchmark. 
 
 📁 **[Access detailed results logs on Google Drive](https://drive.google.com/file/d/1IawGFUvwedsRseJAaYXZJWsBjI-L7I3Q/view?usp=sharing)**
 
+📁 **[Access detailed evalution report on Google Drive](https://drive.google.com/file/d/1BZ7T43niyIU_jM51Dr17RHNdqCLVkgRg/view?usp=sharing)** 
 
 
-## 🤝 Contributing
-
-We welcome contributions of all kinds:
-- 📢 Feature requests? [Open an Issue](https://github.com/agi-inc/agisdk/issues)
-- 🐛 Bug reports? [Create a ticket](https://github.com/agi-inc/agisdk/issues)
-- 📈 Improve REAL tasks? Join our [Project Board](https://github.com/orgs/agi-inc/projects/2)
-- 🛠️ Submit code? Fork + PR - we love clean commits!
-
-Let's build the future of agents together. 🔥
-
-## 💬 Community
-- [Join our Discord](https://discord.gg/c95EJDfXzx) (_coming soon!_)
-- [Follow AGI Inc. on LinkedIn](https://www.linkedin.com/company/the-agi-company/)
-
-## ⭐️ Why AGI SDK?
-
-Because **your agents deserve better** than toy environments. <br>
-Because **the real web is messy** and that's where the magic happens. <br>
-Because **the future is agentic** and it starts here.
