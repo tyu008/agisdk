@@ -65,7 +65,7 @@ def run_demo_agent(model_name="gpt-4o", task_type=None, task_name=None, headless
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    #logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(description="Run DemoAgent on browsergym tasks")
     parser.add_argument("--model", type=str, default="gpt-4o",
                         help="Model to use with the agent (default: gpt-4o)")
