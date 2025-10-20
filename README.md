@@ -94,6 +94,10 @@ python example/hackable.py --model grok-4-fast-reasoning --headless True \
 | **udriver** | 8 | 4 | 50.00% | 
 | **marrisuite** | 3 | 2 | 66.67% |
 
+<p align="center">
+  <img src="figures/Figure_2.png" alt="Performance comparisons between the original benchmark and our improved benchmark" width="700">
+</p>
+
 > **Note**: Results based on evaluation with `grok-4-fast-reasoning` model. Performance may vary with different models and configurations.
 
 📁 **[Access detailed results logs on Google Drive](https://drive.google.com/file/d/1IawGFUvwedsRseJAaYXZJWsBjI-L7I3Q/view?usp=sharing)**
