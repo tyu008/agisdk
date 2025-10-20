@@ -69,6 +69,35 @@ python example/hackable.py --model grok-4-fast-reasoning --headless True \
 ```
 
 
+## 📊 Evaluation Accuracy
+
+### Overall Performance For the Improved Benchmark
+
+| Metric | Value |
+|--------|-------|
+| **Total Tasks** | 102 |
+| **Success Rate** | 59.8% (61/102) |
+
+### Performance by Task Type
+
+| Website | Tasks | Success | Success Rate |
+|---------|-------|---------|--------------|
+| **networkin** | 15 | 13 | 86.67% |
+| **omnizon** | 14 | 10 | 71.43% |
+| **dashdish** | 12 | 9 | 75.00% | 
+| **topwork** | 11 | 5 | 45.45% | 
+| **gocalendar** | 2 | 1 | 50.00% | 
+| **gomail** | 13 | 5 | 38.46% | 
+| **opendining** | 9 | 5 | 55.56% | 
+| **staynb** | 7 | 2 | 28.57% | 
+| **zilloft** | 8 | 5 | 62.50% | 
+| **udriver** | 8 | 4 | 50.00% | 
+| **marrisuite** | 3 | 2 | 66.67% |
+
+> **Note**: Results based on evaluation with `grok-4-fast-reasoning` model. Performance may vary with different models and configurations.
+
+📁 **[Access detailed results logs on Google Drive](https://drive.google.com/file/d/1IawGFUvwedsRseJAaYXZJWsBjI-L7I3Q/view?usp=sharing)**
+
 ## 🤝 Contributing
 
 We welcome contributions of all kinds:
