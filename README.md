@@ -51,10 +51,10 @@ pip install agisdk
 playwright install --force
 
 # Set your LLM API key (for evaluation)
-export OPENAI_API_KEY="your-api-key"   # any supported provider key works
+export XAI_API_KEY="your-api-key"   # any supported provider key works
 ```
 
-✅ Supports OpenAI, Anthropic, OpenRouter, and custom models! <br>
+✅ Supports Grok models! <br>
 
 On Apple Silicon run `brew install --cask playwright` first.
 
@@ -63,16 +63,9 @@ On Apple Silicon run `brew install --cask playwright` first.
 
 Here's a minimal example to get you started for benchmarking an AI agent on the REAL Bench environment:
 
-```python
-from agisdk import REAL
-
-harness = REAL.harness(
-    model="gpt-4o",       # any LLM tag
-    task_type="omnizon",  # Amazon-like store
-    headless=False        # watch it click in real-time!
-)
-
-print(harness.run())      # 🎉
+```bash
+python example/hackable.py --model grok-4-fast-reasoning --headless True \
+--workers 8 --results_dir all_results    # 🎉
 ```
 Need more control? [See full examples ›](/example)
 

@@ -2,7 +2,7 @@ results
 all_results_assamble
 *.DS_Store
 *.pyc
-*.md
+#*.md
 *.json
 browser-use
 browseruse
